@@ -61,3 +61,8 @@ bool RawSocket::modoPromiscuo(struct ifreq desc)
 
 	return true;
 }
+
+bool RawSocket::mandarMensagem(void *data)
+{
+
+}

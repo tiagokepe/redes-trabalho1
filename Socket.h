@@ -17,6 +17,7 @@
 
 using namespace std;
 
+
 class RawSocket {
 	private:
 		bool server;
@@ -28,6 +29,7 @@ class RawSocket {
 	public:
 		RawSocket(void);
 		bool socketValido() const { return socket_desc != -1; }
+
 };
 
 #endif
