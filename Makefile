@@ -1,6 +1,3 @@
-all:
-	g++ -o cliente Cliente.cpp ClienteSocket.cpp
-	g++ -o servidor servidor.cpp ServidorSocket.cpp
 CC = g++
 
 all: msg sock server client 
