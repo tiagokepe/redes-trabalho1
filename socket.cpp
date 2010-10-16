@@ -2,13 +2,11 @@
 using namespace std;
 
 RawSocket::RawSocket(void) {
-    cout  << "Cliando socket" << endl;
     if (!criar()  || !atribuirEndereco((char *) "eth0" ) ) exit(-1);
 }
 
 bool RawSocket::criar() {
     this->socket_desc = socket(AF_PACKET, SOCK_RAW, 0);
-    cout << this->socket_desc << endl;
     if ( !socketValido() )
         return false;
     return true;

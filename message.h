@@ -17,17 +17,20 @@ typedef unsigned char byte;
 class Message
 {
     public:
-       Message(byte *msg = NULL);
-       byte *getMessageString(void) { return this->messageString; };
-       bool messageValida(void);
-       void printMessage(void);
-	   size_t getMessageLength();
-	   bool isMessage(byte *data);
-    private:
-       int setMessage(byte *msg, size_t dataSize);
-       byte messageString[MAX_MESSAGE_SIZE];
-	   int setMessageLength(size_t dataSize);
-	   void cloneMessage(byte *msg, size_t msgSize);
+        Message(byte *msg = NULL);
+        byte *getMessageString(void) { return this->messageString; };
+        bool messageValida(void);
+        void printMessage(void);
+        size_t getMessageLength();
+	    bool isMessage(byte *data);
+        void generateParit();
+        void setParit(byte parit);
+        byte getParit();
+     private:
+        int setMessage(byte *msg, size_t dataSize);
+        byte messageString[MAX_MESSAGE_SIZE];
+	    int setMessageLength(size_t dataSize);
+	    void cloneMessage(byte *msg, size_t msgSize);
 };
 
 #endif
