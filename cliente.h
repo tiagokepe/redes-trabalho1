@@ -1,17 +1,26 @@
 #ifndef H_CLIENTE_H
 #define H_CLIENTE_H
 
-#include "socket.h"
+#include "control.h"
 #include <iostream>
+#include <string.h>
+
+
+/* Tamanho máximo de uma linha a ser lida */
+#define LINE_MAX 1024
+
+
 
 class Cliente {
 	private:
 		bool server;
-		RawSocket *rs;
+		Control *ct;
 
 	public:
 		Cliente(void);
-        RawSocket *getMySocket(void);
+		void interpreter(char *);
+		int cmdLS(char *entrada);
+
 };
 
 #endif
