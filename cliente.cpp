@@ -1,23 +1,58 @@
 #include "cliente.h"
 
 Cliente::Cliente(void) {
-	this->rs = new RawSocket();
+	this->ct = new Control();
 }
 
-/*int Cliente::getMySocket(void) {
-	return (int)this->rs;
-} */
 
-RawSocket *Cliente::getMySocket(void) {
-    return this->rs;
-}
+
 
 int main ( )
 {
+	char entrada[LINE_MAX];
     using namespace std;
     Cliente *cliente = new Cliente();
-    Message *msg = new Message((byte*)"ABCD");
-    cliente->getMySocket()->sendMessage(msg);
+//    cliente->getMySocket()->sendMessage(msg);
+
+	while( ( cout << "$ " )  && ( cin.getline(entrada,LINE_MAX) ) )
+		cliente->interpreter(entrada);
+
 
     return 0;
+}
+
+
+
+
+void Cliente::interpreter(char *entrada)
+{
+	char *cmd = strsep(&entrada," ");
+
+	char *opcoes = (entrada == NULL)?strdup(""):entrada;
+
+	if( !strcmp(cmd,"ls") )
+	{
+		cout << "Comando ls" << endl;
+		cmdLS(opcoes);
+	}
+	else if ( !strcmp(cmd,"cd") )
+	{
+		cout << "Comando cd" << endl;
+	}
+	else
+	{
+		cout << "Comando não encontrado" << endl;
+	}
+
+}
+
+int Cliente::cmdLS( char *entrada)
+{
+	Message * response;
+	this->ct->sendSingleMessage(TYPE_L,entrada);
+
+	response = this->ct->receiveSingleMessage(TYPE_X);
+
+	response->printMessage();
+	return 0;
 }

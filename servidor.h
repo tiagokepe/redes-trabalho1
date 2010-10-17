@@ -1,17 +1,21 @@
 #ifndef H_SERVIDOR_H
 #define H_SERVIDOR_H
 
-#include "socket.h"
+#include "control.h"
 #include <iostream>
+#include <stdio.h>
 
 class Servidor {
 	private:
 		bool server;
-		RawSocket *sock;
+		Control *ct;
 
 	public:
+		void teste(FILE *); /* A ser removido. */
 		Servidor(void);
 		RawSocket *getMySocket(void);
+		Control *getControl() { return this->ct; };
+		bool cmdLS(Message *msg );
 };
 
 #endif
