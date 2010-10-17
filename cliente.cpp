@@ -16,7 +16,7 @@ int main ( )
 {
     using namespace std;
     Cliente *cliente = new Cliente();
-    Message *msg = new Message((byte*)"OI");
+    Message *msg = new Message((byte*)"ABCD");
     cliente->getMySocket()->sendMessage(msg);
 
     return 0;

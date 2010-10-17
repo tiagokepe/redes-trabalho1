@@ -18,19 +18,21 @@ class Message
 {
     public:
         Message(byte *msg = NULL);
-        byte *getMessageString(void) { return this->messageString; };
+   	    bool isMessage(byte *data);
         bool messageValida(void);
         void printMessage(void);
+
+        byte *getMessageString(void) { return this->messageString; };
+
+	    int setMessageLength(size_t dataSize);
         size_t getMessageLength();
-	    bool isMessage(byte *data);
-        void generateParit();
         void setParit(byte parit);
         byte getParit();
-     private:
+     private:	 
+        void cloneMessage(byte *msg, size_t msgSize);
         int setMessage(byte *msg, size_t dataSize);
         byte messageString[MAX_MESSAGE_SIZE];
-	    int setMessageLength(size_t dataSize);
-	    void cloneMessage(byte *msg, size_t msgSize);
+        void generateParit();
 };
 
 #endif

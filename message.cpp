@@ -1,13 +1,19 @@
 #include "message.h"
 
 Message::Message(byte *msg) {
-	
 	/* Usado para contruir mensagens a partir de dados. */
 	if ( isMessage(msg) )
 		cloneMessage(msg,MAX_MESSAGE_SIZE);
 	/* Usado para copiar mensagens na integra. */
 	else
 		this->setMessage(msg, (size_t) strlen( (const char*)msg));
+}
+
+void Message::cloneMessage(byte *msg, size_t msgSize)
+{
+	size_t i;
+	for (i= 0; i < msgSize; i++)
+		this->messageString[i] = msg[i];
 }
 
 int Message::setMessage(byte *msg, size_t dataSize) {
@@ -29,11 +35,14 @@ bool Message::isMessage(byte *data) {
         return true;
     return false;
 }
+
 void Message::printMessage(void) {
-    int i;
-    for(i=0; i < 2; i++)
+    size_t i;
+    size_t tam = this->getMessageLength();
+    for(i=0; i < tam; i++)
         cout << this->messageString[i+4];
     cout << endl;
+    cout << "Paridade = " << this->messageString[MAX_MESSAGE_SIZE-1] << endl;
 }
 
 int Message::setMessageLength(size_t dataSize )
@@ -41,9 +50,7 @@ int Message::setMessageLength(size_t dataSize )
 	/* Tamanho da mensagem descarta marcador de início e próprio espaço para tamanho. */ 
 	if( dataSize > ( MAX_MESSAGE_SIZE - 2 ) )
 		return -1;
-
 	this->messageString[1] = (byte) dataSize;
-
 	return 0;
 }
 
@@ -52,11 +59,14 @@ size_t Message::getMessageLength()
 	return ( ( size_t ) this->messageString[1] );
 }
 
-void Message::cloneMessage(byte *msg, size_t msgSize)
+void Message::setParit(byte parit)
 {
-	int i;
-	for (i= 0;i< (int )  msgSize;i++)
-		this->messageString[i] = msg[i];
+    this->messageString[MAX_MESSAGE_SIZE-1] = parit;
+}
+
+byte Message::getParit()
+{
+    return this->messageString[MAX_MESSAGE_SIZE-1];
 }
 
 /* Retorna se esta mensagem é valida. */
@@ -81,17 +91,7 @@ bool Message::messageValida() {
     return (parit[0] == this->getParit()) ? true : false;
 }
 
-void Message::setParit(byte parit)
-{
-    this->messageString[MAX_MESSAGE_SIZE-1] = parit;
-}
-
-byte Message::getParit() 
-{
-    return this->messageString[MAX_MESSAGE_SIZE-1];
-}
-
-void Message::generateParit() 
+void Message::generateParit()
 {
     int i;
     size_t size = this->getMessageLength();
@@ -104,11 +104,12 @@ void Message::generateParit()
             parit[0] ^= this->messageString[i+4];
         else
             parit[1] ^= this->messageString[i+4];
- 
+
     /* Gera paridade em 8 bits */
-    parit[0] ^= parit[1];       
+    parit[0] ^= parit[1];
 
     this->setParit(parit[0]);
+    cout << "Gerou paridade = " << this->messageString[MAX_MESSAGE_SIZE-1] << endl;
 }
 
 
