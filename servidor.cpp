@@ -50,8 +50,8 @@ int main ( )
 	Servidor *servidor = new Servidor();
     Message *msg;
     byte buffer[MAX_MESSAGE_SIZE];
-    while(1)
-    {
+//    while(1)
+//    {
 		if( msg = servidor->getControl()->receiveSingleMessage() )
 		{
 			msg->printMessage();
@@ -60,7 +60,7 @@ int main ( )
 			else
 				cerr << "Tipo desconhecido" << endl;
         }
-	}
+//	}
 
 
 	return 0;

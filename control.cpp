@@ -35,7 +35,8 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 
 
 int Control::sendSingleMessage(MessageType TM, char *dados) {
-	Message *NewM = new Message( (byte *) dados,TM,this->getSequence());
+    cout << "Single" << endl;
+	Message *NewM = new Message( (byte *) dados,TM, this->getSequence());
 
 	if ( ! NewM->messageValida() )
 		return -1;

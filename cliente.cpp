@@ -10,7 +10,6 @@ Cliente::Cliente(void) {
 int main ( )
 {
 	char entrada[LINE_MAX];
-    using namespace std;
     Cliente *cliente = new Cliente();
 //    cliente->getMySocket()->sendMessage(msg);
 
@@ -26,6 +25,7 @@ int main ( )
 
 void Cliente::interpreter(char *entrada)
 {
+    cout << "Interpretar" << endl;
 	char *cmd = strsep(&entrada," ");
 
 	char *opcoes = (entrada == NULL)?strdup(""):entrada;
@@ -43,16 +43,17 @@ void Cliente::interpreter(char *entrada)
 	{
 		cout << "Comando não encontrado" << endl;
 	}
+    cout<< "ENterpretou" << endl;
 
 }
 
 int Cliente::cmdLS( char *entrada)
 {
 	Message * response;
-	this->ct->sendSingleMessage(TYPE_L,entrada);
+	this->ct->sendSingleMessage(TYPE_L, entrada);
 
-	response = this->ct->receiveSingleMessage(TYPE_X);
+//	response = this->ct->receiveSingleMessage(TYPE_X);
 
-	response->printMessage();
+//	response->printMessage();
 	return 0;
 }

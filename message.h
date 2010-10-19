@@ -54,7 +54,7 @@ class Message
 	   int setMessageLength(size_t dataSize);
 	   void setMessageType(MessageType mt);
 	   void setMessageSequence(int seq);
-	   void cloneMessage(byte *msg, size_t msgSize);
+	   void cloneMessage(byte *msg);
 	   void generateParit();
 	   bool valida; /* Usado em casos onde a o setMessage não pôde construir a mensagem, messageValida usa seu valor. */
 };

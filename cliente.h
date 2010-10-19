@@ -4,6 +4,7 @@
 #include "control.h"
 #include <iostream>
 #include <string.h>
+#include <stdio.h>
 
 
 /* Tamanho máximo de uma linha a ser lida */
