@@ -1,16 +1,17 @@
 #include "message.h"
 
 Message::Message(byte *msg) {
-	/* Usado para copiar mensagens na integra. */
-    if (msg)
-    	cloneMessage(msg);
+	if ( msg )  
+		cloneMessage(msg);
+
 }
 
 /* Usado para contruir mensagens a partir de dados. */
 Message::Message(byte *msg, MessageType mt, int seq) {
     byte * data = ( msg == NULL )?( byte * )strdup(""):msg; 
 	
-	if ( this->setMessage(data, (size_t)strlen( (const char *)data ), mt, seq) )
+
+	if ( this->setMessage(data, (size_t) ( strlen( (const char *)data) + 1 ),mt, seq) )
 	{
 		this->valida = false;
 		cerr << "Esta mensagem é inválida" << endl;
@@ -28,8 +29,6 @@ int Message::setMessage(byte *data, size_t dataSize, MessageType mt, int seq) {
 
 //	if( msg == NULL ) dataSize = 0;
 
-    cout << "dataSize = " << dataSize << endl;
-
 	if ( setMessageLength(dataSize) == -1 ) return -1;
 
 	setMessageSequence(seq);
@@ -40,22 +39,27 @@ int Message::setMessage(byte *data, size_t dataSize, MessageType mt, int seq) {
 
 	/* Parte de dados do buffer é mapeado para */
     for(i=0; i<dataSize; i++)
+
         this->messageString[i+4] = data[i];
-    
-    cout << "Copiou dados" << endl;
 
     this->generateParit();
-    cout << "Saiu no set message" << endl;
+
 
 	return 0;
 }
 
 /* Retorna se esta mensagem é valida. */
 bool Message::messageValida(void) {
-    cout << "MEssage Valida" << endl;
-    if ( (this->messageString[0] == byte(BEGIN_MARKER) ) && ( this->valida ) )
-        return true;
-    
+
+    if ( !( (this->messageString[0] == byte(BEGIN_MARKER) ) && ( this->valida ) && ( checkParity() ) ) )
+		return false;
+
+	return true;
+}
+
+bool Message::checkParity(void) {
+
+
     size_t i;
     size_t size = this->getMessageLength()-2;
     byte parit[2];
@@ -63,7 +67,8 @@ bool Message::messageValida(void) {
 
     /* Checa paridade de 16 bits */
     for(i=0; i < size; i++)
-        if((i%2) == 0)
+
+       if((i%2) == 0)
             parit[0] ^= this->messageString[i+3];
         else
             parit[1] ^= this->messageString[i+3];
@@ -82,20 +87,21 @@ bool Message::isMessage(byte *data) {
 }
 void Message::printMessage(void) {
     size_t i;
-    size_t tam = this->getMessageLength()-2;
+    size_t tam = this->getMessageLength()-3;
     for(i=0; i < tam; i++)
         cout << this->messageString[i+4];
-    cout << endl;
-//    cout << "Paridade = " << (int ) this->getParit() << endl;
+    cout << "*" << endl;
+    cout << "Paridade = " << this->getParit() << endl;
 }
 
 int Message::setMessageLength(size_t dataSize )
 {
-	/* Tamanho da mensagem descarta marcador de início e próprio espaço para tamanho. */ 
-	if( dataSize > ( MAX_MESSAGE_SIZE - 2 ) )
+	/* Tamanho máximo da string = Tamanho de dados - Outros campos */ 
+	if( dataSize > ( MAX_MESSAGE_SIZE - 5 ) )
 		return -1;
-    
-	this->messageString[1] = (byte) (dataSize +3);
+
+	dataSize +=3;
+	this->messageString[1] = (byte) dataSize;
 
 	return 0;
 }
@@ -137,7 +143,7 @@ void Message::cloneMessage(byte *msg)
 	this->valida = true;
 	for (i= 0; i < msgSize; i++)
 		this->messageString[i] = msg[i];
-    cout << "CLONOU" << endl;
+
 }
 
 void Message::setParit(byte parit)
@@ -156,9 +162,8 @@ byte Message::getParit()
 
 void Message::generateParit()
 {
-    size_t i;
+    int i;
     size_t size = this->getMessageLength()-2;
-    cout << "No gerar = " << size << endl;
     byte parit[2];
     parit[0] = parit[1] = 0;
 
@@ -173,6 +178,6 @@ void Message::generateParit()
     parit[0] ^= parit[1];
     cout << "Parit = " << parit[0] << endl;
     this->setParit(parit[0]);
-    cout << "Gerou paridade = " << this->messageString[this->getMessageLength()+1] << endl;
+
 }
 

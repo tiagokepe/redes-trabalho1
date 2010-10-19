@@ -16,12 +16,11 @@ bool Servidor::cmdLS(Message * msg)
 		cmd += (char * ) msg->getMessageData();
 
 
-	cout << cmd << endl;
 
 	if ( ! (fp = popen(cmd.c_str(),"r") ) ) return false;
 
-	this->ct->sendSingleMessage(TYPE_X,fp);
- //	teste(fp); /* Imprime o comando que deve ser redirecionado. */
+//	this->ct->sendMessageUntilZ(TYPE_X,fp);
+// 	teste(fp); /* Imprime o comando que deve ser redirecionado. */
 
 
 	pclose(fp);

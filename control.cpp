@@ -38,11 +38,11 @@ int Control::sendSingleMessage(MessageType TM, char *dados) {
     cout << "Single" << endl;
 	Message *NewM = new Message( (byte *) dados,TM, this->getSequence());
 
-	if ( ! NewM->messageValida() )
-		return -1;
 
 	this->rs->sendMessage(NewM);
 	incrementSequence();
+
+	cout << "Tamnho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
 
 	return 0;
 }
@@ -52,17 +52,19 @@ int Control::sendSingleMessage(MessageType TM, FILE *fp) {
 
 	if ( feof(fp ) ) return -1;
 
-	fgets(buffer,MAX_MESSAGE_SIZE-5,fp);
+		
+
+	buffer[MAX_MESSAGE_SIZE-6] = '\0';
+
 
 	
 	Message *NewM = new Message( (byte *) buffer,TM,this->getSequence());
 
-	if ( ! NewM->messageValida() )
-		return -1;
 
 	this->rs->sendMessage(NewM);
 	incrementSequence();
 
+	cout << "Tamnho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
 	return 0;
 }
 
@@ -71,8 +73,10 @@ Message * Control::receiveSingleMessage()
 {
 	Message *msg = this->rs->getMessage();
 
-	if( !msg->messageValida()   ) return NULL;
+	if ( !msg ) return NULL;
 
+	cout << "Tamnho e paridade recebidos:" << msg->getMessageLength() << " ," << msg->getParit() << endl;
+	
 	return msg;
 
 }
@@ -82,8 +86,9 @@ Message * Control::receiveSingleMessage(MessageType mt)
 {
 	Message *msg = this->receiveSingleMessage();
 
-	if( ( msg->getMessageType() ) != mt  ) return NULL;
+	if( !(msg) || ( msg->getMessageType() ) != mt  ) return NULL;
 
+	
 	return msg;
 
 }
