@@ -50,6 +50,7 @@ class Message
 	   void setParit(byte parit);
            byte getParit();
     private:
+	   bool checkParity();
        byte messageString[MAX_MESSAGE_SIZE];
 	   int setMessageLength(size_t dataSize);
 	   void setMessageType(MessageType mt);

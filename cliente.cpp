@@ -30,6 +30,7 @@ void Cliente::interpreter(char *entrada)
 
 	char *opcoes = (entrada == NULL)?strdup(""):entrada;
 
+	cout << entrada << endl;
 	if( !strcmp(cmd,"ls") )
 	{
 		cout << "Comando ls" << endl;
@@ -48,11 +49,21 @@ void Cliente::interpreter(char *entrada)
 
 int Cliente::cmdLS( char *entrada)
 {
+	bool saiu = false;
 	Message * response;
 	this->ct->sendSingleMessage(TYPE_L,entrada);
 
-	response = this->ct->receiveSingleMessage(TYPE_X);
+//	this->ct->waitTimeout();
 
+	while ( !saiu)
+	{
+		response = this->ct->receiveSingleMessage(TYPE_X);
+
+		if ( response ) saiu = true;
+
+		cout << "pegou resposta" << endl;
+	}
 	response->printMessage();
+	
 	return 0;
 }

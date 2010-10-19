@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sys/select.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #define MAX_TRIES 16
 #define MAX_SEQ 16

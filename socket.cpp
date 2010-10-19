@@ -62,20 +62,22 @@ int RawSocket::getDescriptor(void)
 }
 
 void RawSocket::sendMessage(Message *msg) {
-    send(this->getDescriptor(), msg->getMessageString(), MAX_MESSAGE_SIZE/*msg->getMessageLength()*/, 0);
+    send(this->getDescriptor(), msg->getMessageString(), MAX_MESSAGE_SIZE, 0);
 }
 
 Message *RawSocket::getMessage(void) {
-    byte buffer[MAX_MESSAGE_SIZE];
+    Message *msg;
+	byte buffer[MAX_MESSAGE_SIZE];
     if( recv(this->getDescriptor(), buffer, MAX_MESSAGE_SIZE, 0) == -1)
     {
 //        printf("Error: ao receber\n");
         return NULL;
     }
 	/* Mensagem recebida é copiada localmente. */
-    this->receiveMessage = new Message(buffer);
+    msg = new Message(buffer);
 
+	if ( !(msg->messageValida() ) ) return NULL;
 
-    return this->receiveMessage;
+    return msg;
 }
 
