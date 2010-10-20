@@ -139,7 +139,6 @@ void Message::cloneMessage(byte *msg)
 {
 	size_t i;
     size_t msgSize = (size_t)(msg[1])+2;
-    cout << "No clone tam = " << msgSize << endl;
 	this->valida = true;
 	for (i= 0; i < msgSize; i++)
 		this->messageString[i] = msg[i];

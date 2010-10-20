@@ -24,6 +24,7 @@ class Control {
 		Message *receiveSingleMessage(MessageType mt);
 		Message *receiveSingleMessage();
 		bool receiveUntilZ(MessageType mt,char *data);
+		bool sendUntilZ(MessageType mt, FILE *fp);
 		int getSequence();
 		Control(void);
         RawSocket *getMySocket(void);

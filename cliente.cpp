@@ -50,6 +50,7 @@ void Cliente::interpreter(char *entrada)
 
 int Cliente::cmdLS( char *entrada)
 {
+	char * buffer;
 	bool saiu = false;
 	Message * response;
 	this->ct->sendSingleMessage(TYPE_L, entrada);
@@ -61,15 +62,7 @@ int Cliente::cmdLS( char *entrada)
 
 //	this->ct->waitTimeout();
 
-	while ( !saiu)
-	{
-		response = this->ct->receiveSingleMessage(TYPE_X);
-
-		if ( response ) saiu = true;
-
-		cout << "pegou resposta" << endl;
-	}
-	response->printMessage();
+	this->ct->receiveUntilZ(TYPE_X, buffer);
 
 	return 0;
 }

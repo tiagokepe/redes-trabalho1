@@ -23,13 +23,38 @@ int Control::getSequence() {
 
 bool Control::receiveUntilZ(MessageType TM, char *dados)
 {
-	int i, responseTimeout;
+	Message *msg;
 
-
-	for ( i = 0; ( i < MAX_TRIES )  ; i++ )
+	do
 	{
+		if ( !( msg = receiveSingleMessage(TM) ) ) return false;
 
+		if ( msg->getMessageType() == TYPE_X )
+		{
+			msg->printMessage();
+		}
+		else if ( msg->getMessageType() == TYPE_Z )
+		{
+			cout << "Finalizou mensagem" << endl;
+		}
+	}while( msg->getMessageType() == TYPE_Z );
+	return true;
+}
+
+bool Control::sendUntilZ(MessageType TM, FILE *fp )
+{
+	char buffer[MAX_MESSAGE_SIZE-5];
+
+
+	while ( !feof(fp) )
+	{
+		fgets(buffer,MAX_MESSAGE_SIZE-5,fp);
+	//	fread(buffer,sizeof(char),MAX_MESSAGE_SIZE-6,fp);
+		buffer[MAX_MESSAGE_SIZE-6] = '\0';
+		sendSingleMessage(TM,buffer);
 	}
+	sendSingleMessage(TYPE_Z, (char * ) "");
+
 }
 
 
@@ -71,11 +96,21 @@ int Control::sendSingleMessage(MessageType TM, FILE *fp) {
 /* Recebe qualquer mensagem. */
 Message * Control::receiveSingleMessage()
 {
-	Message *msg = this->rs->getMessage();
+	int i, timeout;
+	Message *msg = NULL;
+	bool received = false;
 
-	if ( !msg ) return NULL;
+	for( i = 0; (i < MAX_TRIES )  && !( received );i++)
+	{
+		timeout = waitTimeout();
+		if ( timeout )
+		{
+			msg = this->rs->getMessage();
+			if ( msg )
+				received=true;
+		}
+	}
 
-	cout << "Tamnho e paridade recebidos:" << msg->getMessageLength() << " ," << msg->getParit() << endl;
 	
 	return msg;
 

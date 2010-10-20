@@ -19,7 +19,7 @@ bool Servidor::cmdLS(Message * msg)
 
 	if ( ! (fp = popen(cmd.c_str(),"r") ) ) return false;
 
-//	this->ct->sendMessageUntilZ(TYPE_X,fp);
+	this->ct->sendUntilZ(TYPE_X,fp);
 // 	teste(fp); /* Imprime o comando que deve ser redirecionado. */
 
 
@@ -49,8 +49,8 @@ int main ( )
 	Servidor *servidor = new Servidor();
     Message *msg;
     byte buffer[MAX_MESSAGE_SIZE];
-//    while(1)
-//    {
+    while(1)
+    {
 		if( msg = servidor->getControl()->receiveSingleMessage() )
 		{
 			msg->printMessage();
@@ -59,7 +59,7 @@ int main ( )
 			else
 				cerr << "Tipo desconhecido" << endl;
         }
-//	}
+	}
 
 
 	return 0;
