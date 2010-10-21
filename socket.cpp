@@ -66,8 +66,9 @@ void RawSocket::sendMessage(Message *msg) {
 }
 
 Message *RawSocket::getMessage(void) {
-    Message *msg;
+    Message *msg = NULL;
 	byte buffer[MAX_MESSAGE_SIZE];
+	cleanBuf(buffer,MAX_MESSAGE_SIZE);
     if( recv(this->getDescriptor(), buffer, MAX_MESSAGE_SIZE, 0) == -1)
     {
 //        printf("Error: ao receber\n");
@@ -76,8 +77,13 @@ Message *RawSocket::getMessage(void) {
 	/* Mensagem recebida é copiada localmente. */
     msg = new Message(buffer);
 
-	if ( !(msg->messageValida() ) ) return NULL;
-
     return msg;
+}
+
+/* Buffer deve ser limpado entre envios para evitar que lixo seja enviado. */
+void RawSocket::cleanBuf(byte *buffer, int size)
+{
+	for(int i =0; i < size; i++)
+		*( buffer + i ) = '\0';
 }
 

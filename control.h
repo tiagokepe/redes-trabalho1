@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #define MAX_TRIES 16
-#define MAX_SEQ 16
+#define MAX_SEQ 7
 #define TIMEOUT 60
 
 class Control {
@@ -18,14 +18,17 @@ class Control {
 		RawSocket *rs;
 		void incrementSequence();
 		int waitTimeout();
-		void cleanBuf(char *buffer, int size);
+		int seqEsperada;
 	public:
+		Message * escuta();
 		int sendSingleMessage(MessageType mt, char *data); /* Dados da mensagem estão em uma string. */
 		int sendSingleMessage(MessageType mt, FILE *data); /* Dados da mensagem são apontados por um file pointe. */
 		Message *receiveSingleMessage(MessageType mt);
 		Message *receiveSingleMessage();
 		bool receiveUntilZ(MessageType mt,char *data);
 		bool sendUntilZ(MessageType mt, FILE *fp);
+		MessageType receiveAnswer();
+		bool sendAnswer(MessageType tipo_resposta );
 		int getSequence();
 		Control(void);
         RawSocket *getMySocket(void);

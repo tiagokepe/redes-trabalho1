@@ -14,7 +14,7 @@ Message::Message(byte *msg, MessageType mt, int seq) {
 	if ( this->setMessage(data, (size_t) ( strlen( (const char *)data) + 1 ),mt, seq) )
 	{
 		this->valida = false;
-	//	cerr << "Esta mensagem é inválida" << endl;
+		cerr << "Esta mensagem é inválida" << endl;
 	}
 	else
 		this->valida = true;
@@ -45,13 +45,19 @@ int Message::setMessage(byte *data, size_t dataSize, MessageType mt, int seq) {
 	return 0;
 }
 
-/* Retorna se esta mensagem é valida. */
-bool Message::messageValida(void) {
+/* Retorna se esta mensagem é valida ou não
+ * 1 - mensagem válida
+ * 0 - lixo
+ * -1 - Paridade inválida. */
+int Message::messageValida(void) {
 
-    if ( !( (this->messageString[0] == byte(BEGIN_MARKER) ) && ( this->valida ) && ( checkParity() ) ) )
-		return false;
+    if ( !( this->messageString[0] == byte(BEGIN_MARKER)  ) )
+		return 0;
+	
+	if ( !checkParity() )
+		return -1;
 
-	return true;
+	return 1;
 }
 
 bool Message::checkParity(void) {
@@ -74,13 +80,6 @@ bool Message::checkParity(void) {
     parit[0] ^= parit[1];
     /* Se paridade calculada == paridade da mensagem enviada */
     return (parit[0] == this->getParit()) ? true : false;
-}
-
-/* Verifica se uma seqüência de bytes qualquer é uma mensagem. */
-bool Message::isMessage(byte *data) {
-    if (data[0] == byte(BEGIN_MARKER) )
-        return true;
-    return false;
 }
 
 /* Usado para imprimir mensagens. */
@@ -115,6 +114,11 @@ void Message::setMessageSequence(int seq )
 	this->messageString[2] = (byte) seq;
 }
 
+int Message::getMessageSequence()
+{
+	return this->messageString[2];
+}
+
 size_t Message::getMessageLength()
 {
 	return ( ( size_t ) this->messageString[1] );
@@ -137,7 +141,6 @@ void Message::cloneMessage(byte *msg)
 {
 	size_t i;
     size_t msgSize = (size_t)(msg[1])+2;
-	this->valida = true;
 	for (i= 0; i < msgSize; i++)
 		this->messageString[i] = msg[i];
 

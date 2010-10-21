@@ -23,6 +23,7 @@ class RawSocket {
         void sendMessage(Message *msg);
         Message *getMessage(void);
         int getDescriptor(void);
+		void cleanBuf(byte *buffer, int size);
     private:
 		bool server;
 		int socket_desc;

@@ -20,7 +20,7 @@ bool Servidor::cmdLS(Message * msg)
 	if ( ! (fp = popen(cmd.c_str(),"r") ) ) return false;
 
 // 	teste(fp); /* Imprime o comando que deve ser redirecionado. */
-	
+	//this->ct->sendAnswer(TYPE_Y);
 	this->ct->sendUntilZ(TYPE_X,fp);
 
 
@@ -57,17 +57,20 @@ int main ( )
     byte buffer[MAX_MESSAGE_SIZE];
     while(1)
     {
-		if( msg = servidor->getControl()->receiveSingleMessage() )
+		if( msg = servidor->getControl()->escuta() )
 		{
-			msg->printMessage();
+			//msg->printMessage();
 			if ( msg->getMessageType() == TYPE_L ) 
 				servidor->cmdLS(msg);
+			else if ( msg->getMessageType() == TYPE_N ) 
+				cout << "Tipo N" << endl;
 			else
-				cerr << "Tipo desconhecido" << endl;
+			{
+
+				cerr << "Tipo desconhecido: " << msg->getMessageType()  << endl;
+			}
         }
 	}
-
-
 	return 0;
 }
 

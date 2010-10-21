@@ -3,6 +3,7 @@
 Control::Control(void) {
 	this->rs = new RawSocket();
 	this->sequence = 0;
+	this->seqEsperada = -1;
 }
 
 
@@ -25,10 +26,11 @@ int Control::getSequence() {
 bool Control::receiveUntilZ(MessageType TM, char *dados)
 {
 	Message *msg;
+	bool fim_envio = false;
 
 	do
 	{
-		if ( !( msg = receiveSingleMessage(TM) ) ) return false;
+		if ( !( msg = receiveSingleMessage(TM) ) ) return NULL;
 
 		if ( msg->getMessageType() == TYPE_X )
 		{
@@ -37,8 +39,9 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 		else if ( msg->getMessageType() == TYPE_Z )
 		{
 			cout << "Finalizou mensagem" << endl;
+			fim_envio = true;
 		}
-	}while( msg->getMessageType() != TYPE_Z );
+	}while( !fim_envio );
 	return true;
 }
 
@@ -47,19 +50,26 @@ bool Control::sendUntilZ(MessageType TM, FILE *fp )
 {
 	char buffer[MAX_MESSAGE_SIZE-5];
 
-	cleanBuf(buffer,MAX_MESSAGE_SIZE-5);
+	rs->cleanBuf( (byte * ) buffer,MAX_MESSAGE_SIZE-5);
 
+	MessageType resposta = TYPE_N;
 
 	while ( !feof(fp) )
 	{
 		fread(buffer,sizeof(char),MAX_MESSAGE_SIZE-6,fp);
-		buffer[MAX_MESSAGE_SIZE-6] = '\0';
-		if ( buffer[0] )
-			sendSingleMessage(TM,buffer);
 
-		cleanBuf(buffer,MAX_MESSAGE_SIZE-5);
+		if ( buffer[0] )
+			do {
+				sendSingleMessage(TM,buffer);
+				resposta = this->receiveAnswer();
+				cout << resposta << endl;
+			} while (resposta == TYPE_N);
+
+		rs->cleanBuf((byte * ) buffer,MAX_MESSAGE_SIZE-5);
 	}
 	sendSingleMessage(TYPE_Z, (char * ) "");
+
+	return true;
 
 }
 
@@ -82,16 +92,12 @@ int Control::sendSingleMessage(MessageType TM, char *dados) {
 /* Manda única mensagem que venha de um arquivo apontado por FP. */
 int Control::sendSingleMessage(MessageType TM, FILE *fp) {
 	char buffer[MAX_MESSAGE_SIZE-5];
-	cleanBuf(buffer,MAX_MESSAGE_SIZE-5);
+	rs->cleanBuf((byte * ) buffer,MAX_MESSAGE_SIZE-5);
 
 	if ( feof(fp ) ) return -1;
 
-		
-
 	buffer[MAX_MESSAGE_SIZE-6] = '\0';
 
-
-	
 	Message *NewM = new Message( (byte *) buffer,TM,this->getSequence());
 
 
@@ -99,7 +105,7 @@ int Control::sendSingleMessage(MessageType TM, FILE *fp) {
 	incrementSequence();
 
 	if ( NewM )
-		cout << "Tamnho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
+		cout << "Tamanho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
 	return 0;
 }
 
@@ -110,20 +116,104 @@ Message * Control::receiveSingleMessage()
 	Message *msg = NULL;
 	bool received = false;
 
+
 	for( i = 0; (i < MAX_TRIES )  && !( received );i++)
 	{
 		timeout = waitTimeout();
-		if ( timeout )
+		if ( timeout ) /* Recebeu a mensagem no tempo esperado */
 		{
 			msg = this->rs->getMessage();
-			if ( msg )
-				received=true;
+			if ( msg ) 
+			{
+				cout << "entrou no receivemsg" << endl;
+				if ( msg->messageValida() == 1 ) /* Mensagem recebida. */
+				{
+					cout << "entrou no receivemsg2" << endl;
+					received=true;
+					sendAnswer(TYPE_Y);
+					this->seqEsperada =  ( msg->getMessageSequence()  + 1)%MAX_SEQ;
+				}
+				else if ( ( msg->messageValida() == -1 ) && (this->seqEsperada >= 0 ) ) /* Paridade erra, pede reenvio. */
+					sendAnswer(TYPE_N);
+			}
+		}
+		else //if ( this->seqEsperada >= 0 )   /* Timeout estourou, pede reenvio. */
+		{
+			sendAnswer(TYPE_N);
 		}
 	}
 
+	if ( !(msg) || !( msg->messageValida() ) ) return NULL;
+
+//	sendAnswer(TYPE_Y);
 	
 	return msg;
 
+}
+
+/* Recebe e retorna uma resposta. */
+MessageType Control::receiveAnswer()
+{
+	int i;
+	Message *msg;
+	int timeout;
+
+	for( i = 0; (i < MAX_TRIES ) ;i++)
+	{
+		timeout = waitTimeout();
+		if ( timeout ) /* Recebeu a mensagem no tempo esperado */
+		{
+			msg = this->rs->getMessage();
+			if ( msg ) 
+			{
+				if ( msg->messageValida() == 1 )
+				{
+					if ( msg->getMessageType() == TYPE_N )
+						return TYPE_N;
+					else if ( msg->getMessageType() == TYPE_Y )
+						return TYPE_Y;
+					else
+					{
+						cerr << "Reposta Inválida" << endl;
+						return TYPE_N;
+					}
+				}
+			}
+		}
+	}
+	return TYPE_N;
+}
+
+bool Control::sendAnswer(MessageType tipo_resposta )
+{
+	char seq[MAX_SEQ];
+	
+	this->rs->cleanBuf( (byte * ) seq,MAX_SEQ);
+
+	sprintf(seq,"%d\0",this->seqEsperada);
+
+	if ( ( tipo_resposta != TYPE_N ) || ( tipo_resposta != TYPE_Y ) )
+		return false;
+	
+	cout << "ENtrou no sendAnswer" << endl;
+	sendSingleMessage(tipo_resposta,seq);
+
+	return true;
+}
+
+Message * Control::escuta()
+{
+	Message *msg;
+	int response = waitTimeout();
+	if  (response )
+	{
+		if ( !( msg = this->rs->getMessage() ) ) return NULL;
+		
+		if ( msg->messageValida() == 1 )
+		return msg;
+	}
+
+	return NULL;
 }
 
 /* Somente aceitamensagem do tipo mt. */
@@ -154,11 +244,5 @@ int Control::waitTimeout()
 	return select(this->rs->getDescriptor()+1, &rfds, NULL, NULL, &tv);
 }
 
-/* Buffer deve ser limpado entre envios para evitar que lixo seja enviado. */
-void Control::cleanBuf(char *buffer, int size)
-{
-	for(int i =0; i < size; i++)
-		*( buffer + i ) = '\0';
-}
 
 																							

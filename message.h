@@ -40,15 +40,15 @@ class Message
        Message(byte *msg = NULL);
 	   Message(byte *msg, MessageType mt, int seq);
        byte *getMessageString(void) { return this->messageString; };
-       bool messageValida(void);
+       int messageValida(void);
        void printMessage(void);
 	   size_t getMessageLength();
 	   byte *getMessageData();
-	   bool isMessage(byte *data);
        int setMessage(byte *msg, size_t dataSize, MessageType mt, int seq);
 	   MessageType getMessageType();
 	   void setParit(byte parit);
-           byte getParit();
+       byte getParit();
+	   int getMessageSequence();
     private:
 	   bool checkParity();
        byte messageString[MAX_MESSAGE_SIZE];
