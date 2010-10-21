@@ -19,8 +19,9 @@ bool Servidor::cmdLS(Message * msg)
 
 	if ( ! (fp = popen(cmd.c_str(),"r") ) ) return false;
 
-	this->ct->sendUntilZ(TYPE_X,fp);
 // 	teste(fp); /* Imprime o comando que deve ser redirecionado. */
+	
+	this->ct->sendUntilZ(TYPE_X,fp);
 
 
 	pclose(fp);
@@ -33,11 +34,16 @@ void Servidor::teste( FILE *fp)
 {
 	char buffer[100];
 
+
+	cout << "--------------------------------------------------------------------------------------------" << endl;
+
      while ( ! feof (fp) )
 	 {
 	     fgets (buffer , 100 , fp);
 	     fputs (buffer , stdout);
 	 }
+//	 rewind(fp);
+	cout << "--------------------------------------------------------------------------------------------" << endl;
 }
 
 

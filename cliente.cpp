@@ -11,7 +11,6 @@ int main ( )
 {
 	char entrada[LINE_MAX];
     Cliente *cliente = new Cliente();
-//    cliente->getMySocket()->sendMessage(msg);
 
 	while( ( cout << "$ " )  && ( cin.getline(entrada,LINE_MAX) ) )
 		cliente->interpreter(entrada);
@@ -25,15 +24,14 @@ int main ( )
 
 void Cliente::interpreter(char *entrada)
 {
-    cout << "Interpretar" << endl;
 	char *cmd = strsep(&entrada," ");
 
 	char *opcoes = (entrada == NULL)?strdup(""):entrada;
 
-	cout << entrada << endl;
+//	cout << entrada << endl;
 	if( !strcmp(cmd,"ls") )
 	{
-		cout << "Comando ls" << endl;
+//		cout << "Comando ls" << endl;
 		cmdLS(opcoes);
 	}
 	else if ( !strcmp(cmd,"cd") )
@@ -44,7 +42,6 @@ void Cliente::interpreter(char *entrada)
 	{
 		cout << "Comando não encontrado" << endl;
 	}
-    cout<< "ENterpretou" << endl;
 
 }
 
@@ -54,13 +51,6 @@ int Cliente::cmdLS( char *entrada)
 	bool saiu = false;
 	Message * response;
 	this->ct->sendSingleMessage(TYPE_L, entrada);
-
-
-//	response = this->ct->receiveSingleMessage(TYPE_X);
-
-//	response->printMessage();
-
-//	this->ct->waitTimeout();
 
 	this->ct->receiveUntilZ(TYPE_X, buffer);
 

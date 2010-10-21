@@ -18,6 +18,7 @@ class Control {
 		RawSocket *rs;
 		void incrementSequence();
 		int waitTimeout();
+		void cleanBuf(char *buffer, int size);
 	public:
 		int sendSingleMessage(MessageType mt, char *data); /* Dados da mensagem estão em uma string. */
 		int sendSingleMessage(MessageType mt, FILE *data); /* Dados da mensagem são apontados por um file pointe. */

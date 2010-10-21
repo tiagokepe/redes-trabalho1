@@ -14,7 +14,7 @@ Message::Message(byte *msg, MessageType mt, int seq) {
 	if ( this->setMessage(data, (size_t) ( strlen( (const char *)data) + 1 ),mt, seq) )
 	{
 		this->valida = false;
-		cerr << "Esta mensagem é inválida" << endl;
+	//	cerr << "Esta mensagem é inválida" << endl;
 	}
 	else
 		this->valida = true;
@@ -23,7 +23,6 @@ Message::Message(byte *msg, MessageType mt, int seq) {
 
 
 int Message::setMessage(byte *data, size_t dataSize, MessageType mt, int seq) {
-    cout << "Entrou no set message" << endl;
     this->messageString[0] = byte(BEGIN_MARKER);
     size_t i;
 
@@ -32,10 +31,8 @@ int Message::setMessage(byte *data, size_t dataSize, MessageType mt, int seq) {
 	if ( setMessageLength(dataSize) == -1 ) return -1;
 
 	setMessageSequence(seq);
-    cout << "Type = " << mt << endl;
 	setMessageType(mt);
 	
-    cout << "Setou seq e type" << endl;
 
 	/* Parte de dados do buffer é mapeado para */
     for(i=0; i<dataSize; i++)
@@ -85,13 +82,14 @@ bool Message::isMessage(byte *data) {
         return true;
     return false;
 }
+
+/* Usado para imprimir mensagens. */
 void Message::printMessage(void) {
     size_t i;
     size_t tam = this->getMessageLength()-3;
     for(i=0; i < tam; i++)
         cout << this->messageString[i+4];
-    cout << "*" << endl;
-    cout << "Paridade = " << this->getParit() << endl;
+   // cout << "Paridade = " << this->getParit() << endl;
 }
 
 int Message::setMessageLength(size_t dataSize )
@@ -147,14 +145,12 @@ void Message::cloneMessage(byte *msg)
 
 void Message::setParit(byte parit)
 {
-//    this->messageString[MAX_MESSAGE_SIZE-1] = parit;
 	  this->messageString[this->getMessageLength()+1] = parit ; 
 
 }
 
 byte Message::getParit()
 {
-  //  return this->messageString[MAX_MESSAGE_SIZE-1];
       return this->messageString[this->getMessageLength()+1];
 }
 
@@ -175,7 +171,7 @@ void Message::generateParit()
 
     /* Gera paridade em 8 bits */
     parit[0] ^= parit[1];
-    cout << "Parit = " << parit[0] << endl;
+//    cout << "Parit = " << parit[0] << endl;
     this->setParit(parit[0]);
 
 }

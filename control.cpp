@@ -11,16 +11,17 @@ RawSocket *Control::getMySocket(void) {
     return this->rs;
 }
 
-
+/* Incrementa sequencia que conta mensagens. */
 void Control::incrementSequence() {
 	this->sequence = (this->sequence + 1)%MAX_SEQ;
 }
 
+/* Pega Seqüência da mensagem. */
 int Control::getSequence() {
 	return this->sequence;
 }
 
-
+/* Recebe mensagens do tipo TM até receber uma mensagem Z, indicando final. */
 bool Control::receiveUntilZ(MessageType TM, char *dados)
 {
 	Message *msg;
@@ -37,43 +38,51 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 		{
 			cout << "Finalizou mensagem" << endl;
 		}
-	}while( msg->getMessageType() == TYPE_Z );
+	}while( msg->getMessageType() != TYPE_Z );
 	return true;
 }
 
+/* Manda várias mensagens até mensagem Z, indicando final. */
 bool Control::sendUntilZ(MessageType TM, FILE *fp )
 {
 	char buffer[MAX_MESSAGE_SIZE-5];
 
+	cleanBuf(buffer,MAX_MESSAGE_SIZE-5);
+
 
 	while ( !feof(fp) )
 	{
-		fgets(buffer,MAX_MESSAGE_SIZE-5,fp);
-	//	fread(buffer,sizeof(char),MAX_MESSAGE_SIZE-6,fp);
+		fread(buffer,sizeof(char),MAX_MESSAGE_SIZE-6,fp);
 		buffer[MAX_MESSAGE_SIZE-6] = '\0';
-		sendSingleMessage(TM,buffer);
+		if ( buffer[0] )
+			sendSingleMessage(TM,buffer);
+
+		cleanBuf(buffer,MAX_MESSAGE_SIZE-5);
 	}
 	sendSingleMessage(TYPE_Z, (char * ) "");
 
 }
 
 
-
+/* Manda única mensagem do tipo TM que vem da sequencia de char em dados. */
 int Control::sendSingleMessage(MessageType TM, char *dados) {
-    cout << "Single" << endl;
 	Message *NewM = new Message( (byte *) dados,TM, this->getSequence());
 
 
 	this->rs->sendMessage(NewM);
 	incrementSequence();
 
-	cout << "Tamnho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
 
+	if ( NewM )
+		cout << "Tamnho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
+	
 	return 0;
 }
 
+/* Manda única mensagem que venha de um arquivo apontado por FP. */
 int Control::sendSingleMessage(MessageType TM, FILE *fp) {
 	char buffer[MAX_MESSAGE_SIZE-5];
+	cleanBuf(buffer,MAX_MESSAGE_SIZE-5);
 
 	if ( feof(fp ) ) return -1;
 
@@ -89,7 +98,8 @@ int Control::sendSingleMessage(MessageType TM, FILE *fp) {
 	this->rs->sendMessage(NewM);
 	incrementSequence();
 
-	cout << "Tamnho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
+	if ( NewM )
+		cout << "Tamnho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
 	return 0;
 }
 
@@ -128,7 +138,7 @@ Message * Control::receiveSingleMessage(MessageType mt)
 
 }
 
-
+/* Espera um tempo por resposta no socket. */
 int Control::waitTimeout()
 {
 	fd_set rfds;
@@ -143,4 +153,12 @@ int Control::waitTimeout()
   
 	return select(this->rs->getDescriptor()+1, &rfds, NULL, NULL, &tv);
 }
+
+/* Buffer deve ser limpado entre envios para evitar que lixo seja enviado. */
+void Control::cleanBuf(char *buffer, int size)
+{
+	for(int i =0; i < size; i++)
+		*( buffer + i ) = '\0';
+}
+
 																							
