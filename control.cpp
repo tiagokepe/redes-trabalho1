@@ -71,8 +71,12 @@ bool Control::sendUntilZ(MessageType TM, FILE *fp )
 		rs->cleanBuf((byte * ) buffer,MAX_MESSAGE_SIZE-5);
 	}
     cout << "********************Mandando a Z**********************" << endl;
-	sendSingleMessage(TYPE_Z);
+    do {
+    	sendSingleMessage(TYPE_Z);
+		resposta = this->receiveAnswer();
+    } while (resposta != TYPE_Y);
 
+    cout << "Reposta = " << resposta << endl;
 	return true;
 }
 
@@ -158,6 +162,7 @@ Message * Control::receiveSingleMessage()
 	}
 
 	if ( !(msg) || !( msg->messageValida() ) ) return NULL;
+	cout << "Tipo = " << msg->getMessageType() << endl;
 
 //	sendAnswer(TYPE_Y);
 	
@@ -207,7 +212,7 @@ bool Control::sendAnswer(MessageType tipo_resposta )
 
 	sprintf(seq,"%d\0",this->seqEsperada);
 
-	if ( ( tipo_resposta != TYPE_N ) || ( tipo_resposta != TYPE_Y ) )
+	if ( ( tipo_resposta != TYPE_N ) && ( tipo_resposta != TYPE_Y ) )
 		return false;
 	
 	cout << "ENtrou no sendAnswer" << endl;
@@ -219,14 +224,14 @@ bool Control::sendAnswer(MessageType tipo_resposta )
 Message * Control::escuta()
 {
 	Message *msg;
-	int response = waitTimeout();
-	if  (response )
-	{
+	//int response = this->waitTimeout();
+//	if  (response )
+//	{
 		if ( !( msg = this->rs->getMessage() ) ) return NULL;
 		
 		if ( msg->messageValida() == 1 )
-		return msg;
-	}
+		    return msg;
+//	}
 
 	return NULL;
 }
@@ -267,7 +272,7 @@ Message * Control::receiveSingleMessage(MessageType mt)
 	if ( !received && (!(msg) || !( msg->messageValida() ) ) ) return NULL;
 
 //	sendAnswer(TYPE_Y);
-	
+	cout << "Tipo = " << msg->getMessageType() << endl;
 	return msg;
 
 

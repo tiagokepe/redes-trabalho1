@@ -65,7 +65,7 @@ int main ( )
             }
 			else if ( msg->getMessageType() == TYPE_N ) ;
 				//cout << "Tipo N" << endl;
-			else
+			else 
 			{
 
 				cerr << "Tipo desconhecido: " << msg->getMessageType()  << endl;

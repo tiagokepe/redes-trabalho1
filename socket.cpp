@@ -77,7 +77,7 @@ Message *RawSocket::getMessage(void) {
 	/* Mensagem recebida é copiada localmente. */
     msg = new Message(buffer);
 
-    cout << "Tipo = " << msg->getMessageType() << endl;
+//    cout << "Tipo = " << msg->getMessageType() << endl;
 
     return msg;
 }
