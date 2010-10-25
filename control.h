@@ -23,6 +23,7 @@ class Control {
 		Message * escuta();
 		int sendSingleMessage(MessageType mt, char *data); /* Dados da mensagem estão em uma string. */
 		int sendSingleMessage(MessageType mt, FILE *data); /* Dados da mensagem são apontados por um file pointe. */
+        void sendSingleMessage(MessageType TM);
 		Message *receiveSingleMessage(MessageType mt);
 		Message *receiveSingleMessage();
 		bool receiveUntilZ(MessageType mt,char *data);

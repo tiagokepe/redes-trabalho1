@@ -5,8 +5,6 @@ Cliente::Cliente(void) {
 }
 
 
-
-
 int main ( )
 {
 	char entrada[LINE_MAX];
@@ -18,8 +16,6 @@ int main ( )
 
     return 0;
 }
-
-
 
 
 void Cliente::interpreter(char *entrada)
@@ -50,8 +46,15 @@ int Cliente::cmdLS( char *entrada)
 	char * buffer;
 	bool saiu = false;
 	Message * response;
-	this->ct->sendSingleMessage(TYPE_L, entrada);
+	/* Aguarda resposta Ack para enviar os dados */
+    do 
+    {
+        this->ct->sendSingleMessage(TYPE_L, entrada);
+        //cout << "Cliente no do" << endl;
+    }
+    while ( this->ct->receiveAnswer() != TYPE_Y );
 
+    /* Envia os dados até a mensagem tipo Z */
 	this->ct->receiveUntilZ(TYPE_X, buffer);
 
 	return 0;

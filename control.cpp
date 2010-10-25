@@ -6,8 +6,6 @@ Control::Control(void) {
 	this->seqEsperada = -1;
 }
 
-
-
 RawSocket *Control::getMySocket(void) {
     return this->rs;
 }
@@ -34,6 +32,8 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 
 		if ( msg->getMessageType() == TYPE_X )
 		{
+            cout << "Enviando resposta Y" << endl;
+            this->sendAnswer(TYPE_Y);
 			msg->printMessage();
 		}
 		else if ( msg->getMessageType() == TYPE_Z )
@@ -41,7 +41,7 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 			cout << "Finalizou mensagem" << endl;
 			fim_envio = true;
 		}
-	}while( !fim_envio );
+	} while( !fim_envio );
 	return true;
 }
 
@@ -56,23 +56,36 @@ bool Control::sendUntilZ(MessageType TM, FILE *fp )
 
 	while ( !feof(fp) )
 	{
+        cout << "Entrou no While" << endl;
 		fread(buffer,sizeof(char),MAX_MESSAGE_SIZE-6,fp);
 
 		if ( buffer[0] )
 			do {
+                cout << "Entrou no DO***" << endl;
 				sendSingleMessage(TM,buffer);
+                cout << "Enviou dados" << endl;
 				resposta = this->receiveAnswer();
-				cout << resposta << endl;
-			} while (resposta == TYPE_N);
+                cout << "Resposta = " << resposta << endl;
+			} while (resposta != TYPE_Y);
 
 		rs->cleanBuf((byte * ) buffer,MAX_MESSAGE_SIZE-5);
 	}
-	sendSingleMessage(TYPE_Z, (char * ) "");
+    cout << "********************Mandando a Z**********************" << endl;
+	sendSingleMessage(TYPE_Z);
 
 	return true;
-
 }
 
+void Control::sendSingleMessage(MessageType TM) {
+	Message *NewM = new Message( NULL,TM, this->getSequence());
+
+	this->rs->sendMessage(NewM);
+	incrementSequence();
+
+	if ( NewM ) ;
+        //cout << NewM->getMessageType() << endl; 
+		
+}
 
 /* Manda única mensagem do tipo TM que vem da sequencia de char em dados. */
 int Control::sendSingleMessage(MessageType TM, char *dados) {
@@ -81,10 +94,11 @@ int Control::sendSingleMessage(MessageType TM, char *dados) {
 
 	this->rs->sendMessage(NewM);
 	incrementSequence();
-
+    
 
 	if ( NewM )
-		cout << "Tamnho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
+		//cout << "Tamnho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
+    //cout << "Tipo = " << TM << endl;
 	
 	return 0;
 }
@@ -105,7 +119,7 @@ int Control::sendSingleMessage(MessageType TM, FILE *fp) {
 	incrementSequence();
 
 	if ( NewM )
-		cout << "Tamanho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
+		//cout << "Tamanho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
 	return 0;
 }
 
@@ -125,10 +139,10 @@ Message * Control::receiveSingleMessage()
 			msg = this->rs->getMessage();
 			if ( msg ) 
 			{
-				cout << "entrou no receivemsg" << endl;
+				//cout << "entrou no receivemsg" << endl;
 				if ( msg->messageValida() == 1 ) /* Mensagem recebida. */
 				{
-					cout << "entrou no receivemsg2" << endl;
+					//cout << "entrou no receivemsg2" << endl;
 					received=true;
 					sendAnswer(TYPE_Y);
 					this->seqEsperada =  ( msg->getMessageSequence()  + 1)%MAX_SEQ;
@@ -158,12 +172,13 @@ MessageType Control::receiveAnswer()
 	Message *msg;
 	int timeout;
 
+
 	for( i = 0; (i < MAX_TRIES ) ;i++)
 	{
-		timeout = waitTimeout();
+        timeout = waitTimeout();
 		if ( timeout ) /* Recebeu a mensagem no tempo esperado */
 		{
-			msg = this->rs->getMessage();
+            msg = this->rs->getMessage();
 			if ( msg ) 
 			{
 				if ( msg->messageValida() == 1 )
@@ -219,12 +234,50 @@ Message * Control::escuta()
 /* Somente aceitamensagem do tipo mt. */
 Message * Control::receiveSingleMessage(MessageType mt)
 {
+    int i, timeout;
+	Message *msg = NULL;
+	bool received = false;
+
+	for( i = 0; (i < MAX_TRIES ) && !( received ); i++)
+	{
+		timeout = waitTimeout();
+		if ( timeout ) /* Recebeu a mensagem no tempo esperado */
+		{
+			msg = this->rs->getMessage();
+			if ( msg ) 
+			{
+				//cout << "entrou no receivemsg" << endl;
+				if ( msg->messageValida() == 1 && msg->getMessageType() == mt) /* Mensagem recebida. */
+				{
+					//cout << "entrou no receivemsg2" << endl;
+					received=true;
+					sendAnswer(TYPE_Y);
+					this->seqEsperada =  ( msg->getMessageSequence()  + 1)%MAX_SEQ;
+				}
+				else if ( ( msg->messageValida() == -1 ) && (this->seqEsperada >= 0 ) ) /* Paridade erra, pede reenvio. */
+					sendAnswer(TYPE_N);
+			}
+		}
+		else //if ( this->seqEsperada >= 0 )   /* Timeout estourou, pede reenvio. */
+		{
+			sendAnswer(TYPE_N);
+		}
+	}
+
+	if ( !received && (!(msg) || !( msg->messageValida() ) ) ) return NULL;
+
+//	sendAnswer(TYPE_Y);
+	
+	return msg;
+
+
+/*
 	Message *msg = this->receiveSingleMessage();
 
 	if( !(msg) || ( msg->getMessageType() ) != mt  ) return NULL;
 
-	
-	return msg;
+		return msg;
+*/
 
 }
 

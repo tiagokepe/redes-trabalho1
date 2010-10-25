@@ -11,11 +11,10 @@ bool Servidor::cmdLS(Message * msg)
 	FILE *fp;
 	string cmd ( "ls ");
 
+    this->ct->sendSingleMessage(TYPE_Y);
 
 	if( ( msg->getMessageLength() - 3 ) > 0 )
 		cmd += (char * ) msg->getMessageData();
-
-
 
 	if ( ! (fp = popen(cmd.c_str(),"r") ) ) return false;
 
@@ -60,10 +59,12 @@ int main ( )
 		if( msg = servidor->getControl()->escuta() )
 		{
 			//msg->printMessage();
-			if ( msg->getMessageType() == TYPE_L ) 
+			if ( msg->getMessageType() == TYPE_L ) {
+                //cout << msg->getMessageType() << endl;          
 				servidor->cmdLS(msg);
-			else if ( msg->getMessageType() == TYPE_N ) 
-				cout << "Tipo N" << endl;
+            }
+			else if ( msg->getMessageType() == TYPE_N ) ;
+				//cout << "Tipo N" << endl;
 			else
 			{
 
