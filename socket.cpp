@@ -2,7 +2,7 @@
 using namespace std;
 
 RawSocket::RawSocket(void) {
-    if (!criar()  || !atribuirEndereco((char *) "eth0" ) ) exit(-1);
+    if (!criar()  || !atribuirEndereco((char *) DEVICE ) ) exit(-1);
 }
 
 bool RawSocket::criar() {

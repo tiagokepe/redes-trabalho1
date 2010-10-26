@@ -32,8 +32,7 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 
 		if ( msg->getMessageType() == TYPE_X )
 		{
-            cout << "Enviando resposta Y" << endl;
-            this->sendAnswer(TYPE_Y);
+	            cout << "Enviando resposta Y" << endl;
 			msg->printMessage();
 		}
 		else if ( msg->getMessageType() == TYPE_Z )
@@ -252,7 +251,7 @@ Message * Control::receiveSingleMessage(MessageType mt)
 			if ( msg ) 
 			{
 				//cout << "entrou no receivemsg" << endl;
-				if ( msg->messageValida() == 1 && msg->getMessageType() == mt) /* Mensagem recebida. */
+				if ( msg->messageValida() == 1 && ( ( msg->getMessageType() == mt ) || ( msg->getMessageType() == TYPE_Z   ) ) ) /* Mensagem recebida. */
 				{
 					//cout << "entrou no receivemsg2" << endl;
 					received=true;
@@ -271,7 +270,7 @@ Message * Control::receiveSingleMessage(MessageType mt)
 
 	if ( !received && (!(msg) || !( msg->messageValida() ) ) ) return NULL;
 
-//	sendAnswer(TYPE_Y);
+
 	cout << "Tipo = " << msg->getMessageType() << endl;
 	return msg;
 
