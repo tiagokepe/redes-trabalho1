@@ -25,8 +25,12 @@ typedef enum {
 	TYPE_C, /* cd */
 	TYPE_D, /* dados */
 	TYPE_F, /* descritor de arquivos */
-	TYPE_E, /* erro */
-
+	
+	TYPE_E1, /* erro 1 - dir inexistente */
+	TYPE_E2, /* erro 2 - falta de permissão */
+	TYPE_E3, /* erro 3 - espaço insuficiente */
+    TYPE_E4, /* erro 4 - arq inexistente */
+	
 	TYPE_P, /* put */
 
 	TYPE_G /* get */

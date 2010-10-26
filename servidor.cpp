@@ -30,9 +30,19 @@ bool Servidor::cmdLS(Message * msg)
 bool Servidor::cmdCD(Message * msg)
 {
     byte *dir;
-    this->ct->sendAnswer(TYPE_Y);
     dir = msg->getMessageData();
-    chdir((char *)dir);
+    if ( chdir((char *)dir) == 0) {
+        this->ct->sendAnswer(TYPE_Y);
+        cout << "OK" << endl;
+    }        
+    else
+        if (errno == ENOTDIR)
+            this->ct->sendAnswer(TYPE_E1);
+        else
+            if (errno == EACCES)                    
+                this->ct->sendAnswer(TYPE_E2);
+                     
+
 }
 
 

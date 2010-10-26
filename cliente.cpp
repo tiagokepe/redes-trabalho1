@@ -62,9 +62,18 @@ int Cliente::cmdLS( char *entrada)
 
 void Cliente::cmdCD(char *entrada)
 {
-	/* Aguarda resposta Ack para enviar os dados */
+    byte resposta;
+ 	/* Aguarda resposta Ack para enviar os dados */
     do 
     {
         this->ct->sendSingleMessage(TYPE_C, entrada);
-    } while ( this->ct->receiveAnswer() != TYPE_Y );
+        resposta = this->ct->receiveAnswer();
+    } while ( resposta != TYPE_Y || resposta != TYPE_E1 || resposta != TYPE_E2 );
+
+    if (resposta == TYPE_E1)
+        cerr << "Error: Diretório inexistente." << endl;
+    else 
+        if (resposta == TYPE_E2)            
+            cerr << "Error: Permissão negada." << endl;
+  
 }

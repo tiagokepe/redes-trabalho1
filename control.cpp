@@ -190,7 +190,15 @@ MessageType Control::receiveAnswer()
 					if ( msg->getMessageType() == TYPE_N )
 						return TYPE_N;
 					else if ( msg->getMessageType() == TYPE_Y )
-						return TYPE_Y;
+						    return TYPE_Y;
+					else if ( msg->getMessageType() == TYPE_E1 )
+						    return TYPE_E1;
+				    else if ( msg->getMessageType() == TYPE_E2 )
+						    return TYPE_E2;
+					else if ( msg->getMessageType() == TYPE_E3 )
+						    return TYPE_E3;
+					else if ( msg->getMessageType() == TYPE_E4 )
+						    return TYPE_E4;      
 					else
 					{
 						cerr << "Reposta Inválida" << endl;
@@ -211,7 +219,9 @@ bool Control::sendAnswer(MessageType tipo_resposta )
 
 	sprintf(seq,"%d\0",this->seqEsperada);
 
-	if ( ( tipo_resposta != TYPE_N ) && ( tipo_resposta != TYPE_Y ) )
+	if ( ( tipo_resposta != TYPE_N ) && ( tipo_resposta != TYPE_Y ) 
+	        && ( tipo_resposta != TYPE_E1 )  && ( tipo_resposta != TYPE_E2 )
+	        && ( tipo_resposta != TYPE_E3 )  && ( tipo_resposta != TYPE_E4 ) )
 		return false;
 	
 	cout << "ENtrou no sendAnswer" << endl;
