@@ -18,8 +18,6 @@ bool Servidor::cmdLS(Message * msg)
 
 	if ( ! (fp = popen(cmd.c_str(),"r") ) ) return false;
 
-// 	teste(fp); /* Imprime o comando que deve ser redirecionado. */
-	//this->ct->sendAnswer(TYPE_Y);
 	this->ct->sendUntilZ(TYPE_X,fp);
 
 	pclose(fp);
@@ -31,18 +29,27 @@ bool Servidor::cmdCD(Message * msg)
 {
     byte *dir;
     dir = msg->getMessageData();
-    if ( chdir((char *)dir) == 0) {
+    int error, errval;
+//    cout << "DIr = " << dir << endl;
+    errval = chdir((char *)dir);
+    error = errno;
+    if ( errval == 0 ) {
         this->ct->sendAnswer(TYPE_Y);
         cout << "OK" << endl;
     }        
     else
-        if (errno == ENOTDIR)
+    {
+        if (error == ENOENT) {
+            cout << "Else 1" << endl;
             this->ct->sendAnswer(TYPE_E1);
+        }            
         else
-            if (errno == EACCES)                    
+            if (error == EACCES) {
+                cout << "Else 2" << endl;
                 this->ct->sendAnswer(TYPE_E2);
+            }
+    }                
                      
-
 }
 
 

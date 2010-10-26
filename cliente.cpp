@@ -68,7 +68,7 @@ void Cliente::cmdCD(char *entrada)
     {
         this->ct->sendSingleMessage(TYPE_C, entrada);
         resposta = this->ct->receiveAnswer();
-    } while ( resposta != TYPE_Y || resposta != TYPE_E1 || resposta != TYPE_E2 );
+    } while ( resposta != TYPE_Y && resposta != TYPE_E1 && resposta != TYPE_E2 );
 
     if (resposta == TYPE_E1)
         cerr << "Error: Diretório inexistente." << endl;

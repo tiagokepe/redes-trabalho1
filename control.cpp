@@ -221,7 +221,7 @@ bool Control::sendAnswer(MessageType tipo_resposta )
 
 	if ( ( tipo_resposta != TYPE_N ) && ( tipo_resposta != TYPE_Y ) 
 	        && ( tipo_resposta != TYPE_E1 )  && ( tipo_resposta != TYPE_E2 )
-	        && ( tipo_resposta != TYPE_E3 )  && ( tipo_resposta != TYPE_E4 ) )
+	        && ( tipo_resposta != TYPE_E3 )&& ( tipo_resposta != TYPE_E4 ) )
 		return false;
 	
 	cout << "ENtrou no sendAnswer" << endl;
