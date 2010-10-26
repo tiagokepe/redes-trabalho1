@@ -21,7 +21,7 @@ class Cliente {
 		Cliente(void);
 		void interpreter(char *);
 		int cmdLS(char *entrada);
-
+        void cmdCD(char *entrada);
 };
 
 #endif

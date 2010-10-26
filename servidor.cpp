@@ -11,7 +11,7 @@ bool Servidor::cmdLS(Message * msg)
 	FILE *fp;
 	string cmd ( "ls ");
 
-    this->ct->sendSingleMessage(TYPE_Y);
+    this->ct->sendAnswer(TYPE_Y);
 
 	if( ( msg->getMessageLength() - 3 ) > 0 )
 		cmd += (char * ) msg->getMessageData();
@@ -22,12 +22,19 @@ bool Servidor::cmdLS(Message * msg)
 	//this->ct->sendAnswer(TYPE_Y);
 	this->ct->sendUntilZ(TYPE_X,fp);
 
-
 	pclose(fp);
 
 	return true;
-
 }
+
+bool Servidor::cmdCD(Message * msg)
+{
+    byte *dir;
+    this->ct->sendAnswer(TYPE_Y);
+    dir = msg->getMessageData();
+    chdir((char *)dir);
+}
+
 
 void Servidor::teste( FILE *fp)
 {
@@ -63,7 +70,8 @@ int main ( )
                 //cout << msg->getMessageType() << endl;          
 				servidor->cmdLS(msg);
             }
-			else if ( msg->getMessageType() == TYPE_N ) ;
+			else if ( msg->getMessageType() == TYPE_C ) 
+			        servidor->cmdCD(msg);
 				//cout << "Tipo N" << endl;
 			else 
 			{

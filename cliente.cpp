@@ -32,7 +32,7 @@ void Cliente::interpreter(char *entrada)
 	}
 	else if ( !strcmp(cmd,"cd") )
 	{
-		cout << "Comando cd" << endl;
+        cmdCD(opcoes);
 	}
 	else
 	{
@@ -58,4 +58,13 @@ int Cliente::cmdLS( char *entrada)
 	this->ct->receiveUntilZ(TYPE_X, buffer);
 
 	return 0;
+}
+
+void Cliente::cmdCD(char *entrada)
+{
+	/* Aguarda resposta Ack para enviar os dados */
+    do 
+    {
+        this->ct->sendSingleMessage(TYPE_C, entrada);
+    } while ( this->ct->receiveAnswer() != TYPE_Y );
 }

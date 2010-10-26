@@ -4,6 +4,7 @@
 #include "control.h"
 #include <iostream>
 #include <stdio.h>
+#include <string.h>
 
 class Servidor {
 	private:
@@ -16,6 +17,8 @@ class Servidor {
 		RawSocket *getMySocket(void);
 		Control *getControl() { return this->ct; };
 		bool cmdLS(Message *msg );
+		bool cmdCD(Message * msg);
+
 };
 
 #endif
