@@ -34,11 +34,10 @@ void Cliente::interpreter(char *entrada)
 	{
         cmdCD(opcoes);
 	}
-	else
+	else if( !strcmp(cmd, "lls") )
 	{
-		cout << "Comando não encontrado" << endl;
+	    cmdLLS(opcoes);
 	}
-
 }
 
 int Cliente::cmdLS( char *entrada)
@@ -76,4 +75,13 @@ void Cliente::cmdCD(char *entrada)
         if (resposta == TYPE_E2)            
             cerr << "Error: Permissão negada." << endl;
   
+}
+
+void Cliente::cmdLLS(char *opcoes)
+{
+    string cmd ("ls ");
+    string opt (opcoes);    
+    cmd += opt;
+    system(cmd.c_str());
+    
 }
