@@ -25,9 +25,10 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 {
 	Message *msg;
 	bool fim_envio = false;
-	FILE *saida;
+	FILE *saida = NULL;
 	size_t tam;
-	cout << "NOme - " << dados << endl;
+
+//	cout << "NOme - " << dados << endl;
 	if ( ( TM == TYPE_D ) && ( dados ) )
 		if ( !( saida = fopen(dados,"wb")) ) return false;
 
@@ -53,6 +54,10 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 			fim_envio = true;
 		}
 	} while( !fim_envio );
+	
+	if ( saida )
+		fclose(saida);
+	
 	return true;
 }
 
