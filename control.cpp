@@ -25,6 +25,11 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 {
 	Message *msg;
 	bool fim_envio = false;
+	FILE *saida;
+	size_t tam;
+	cout << "NOme - " << dados << endl;
+	if ( ( TM == TYPE_D ) && ( dados ) )
+		if ( !( saida = fopen(dados,"wb")) ) return false;
 
 	do
 	{
@@ -34,6 +39,13 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 		{
 	            cout << "Enviando resposta Y" << endl;
 			msg->printMessage();
+		}
+		else if( msg->getMessageType() == TYPE_D )
+		{
+			msg->printMessage();
+			tam = strlen((const char * ) msg->getMessageData());
+			cout << "TAM + " <<  strlen((const char * ) msg->getMessageData()) << endl;
+			fwrite(msg->getMessageData(),sizeof(byte),tam,saida);
 		}
 		else if ( msg->getMessageType() == TYPE_Z )
 		{
@@ -60,7 +72,7 @@ bool Control::sendUntilZ(MessageType TM, FILE *fp )
 
 		if ( buffer[0] )
 			do {
-                cout << "Entrou no DO***" << endl;
+                cout << "BUFFER - ***" << buffer << endl;
 				sendSingleMessage(TM,buffer);
                 cout << "Enviou dados" << endl;
 				resposta = this->receiveAnswer();
@@ -224,7 +236,7 @@ bool Control::sendAnswer(MessageType tipo_resposta )
 	        && ( tipo_resposta != TYPE_E3 )&& ( tipo_resposta != TYPE_E4 ) )
 		return false;
 	
-	cout << "ENtrou no sendAnswer" << endl;
+//	cout << "ENtrou no sendAnswer" << endl;
 	sendSingleMessage(tipo_resposta,seq);
 
 	return true;
@@ -281,7 +293,7 @@ Message * Control::receiveSingleMessage(MessageType mt)
 	if ( !received && (!(msg) || !( msg->messageValida() ) ) ) return NULL;
 
 
-	cout << "Tipo = " << msg->getMessageType() << endl;
+//	cout << "Tipo = " << msg->getMessageType() << endl;
 	return msg;
 
 

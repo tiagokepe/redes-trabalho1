@@ -42,6 +42,10 @@ void Cliente::interpreter(char *entrada)
 	{
 	    cmdLCD(opcoes);
 	}
+	else if( !strcmp(cmd, "get") )
+	{
+		cmdGET(opcoes);
+	}
 
 }
 
@@ -62,6 +66,34 @@ int Cliente::cmdLS( char *entrada)
 	this->ct->receiveUntilZ(TYPE_X, buffer);
 
 	return 0;
+}
+
+bool Cliente::cmdGET(char *entrada)
+{
+
+	MessageType mt;
+	do
+	{
+		this->ct->sendSingleMessage(TYPE_G, entrada);
+		mt = this->ct->receiveAnswer();
+	}
+	while ( ( mt != TYPE_Y ) && ( mt != TYPE_E1 ) && ( mt != TYPE_E2 ) );
+
+	if ( mt == TYPE_E1 )
+	{
+		cerr << "Arquivo inexistente." << endl;
+		return false;
+	}
+	else if ( mt == TYPE_E2 )
+	{
+		cerr << "Permissão negada." << endl;
+		return false;
+	}
+	this->ct->sendAnswer(TYPE_Y);
+
+	this->ct->receiveUntilZ(TYPE_D,basename(entrada));
+
+	return true;
 }
 
 void Cliente::cmdCD(char *entrada)

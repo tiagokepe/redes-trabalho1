@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
+#include <libgen.h>
 
 
 /* Tamanho máximo de uma linha a ser lida */
@@ -24,6 +25,7 @@ class Cliente {
         void cmdCD(char *entrada);
         void cmdLLS(char *opcoes);
         void cmdLCD(char *opcoes);
+		bool cmdGET(char *opcoes);
 
 };
 

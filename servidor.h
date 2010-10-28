@@ -5,7 +5,9 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <errno.h>
+
 
 class Servidor {
 	private:
@@ -19,6 +21,7 @@ class Servidor {
 		Control *getControl() { return this->ct; };
 		bool cmdLS(Message *msg );
 		bool cmdCD(Message * msg);
+		bool cmdGET(Message * msg );
 
 };
 

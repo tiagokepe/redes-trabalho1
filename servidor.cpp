@@ -24,7 +24,48 @@ bool Servidor::cmdLS(Message * msg)
 
 	return true;
 }
+bool Servidor::cmdGET(Message *msg)
+{
+	FILE *fp;
+	char *file;
+	char tam[MAX_MESSAGE_SIZE-5];
+	struct stat st;
+	MessageType mt;
 
+	file = (char * ) msg->getMessageData();
+
+	if(  !( fp = fopen(file,"r") ) )
+	{
+		if( errno == ENOENT )
+			this->ct->sendAnswer(TYPE_E1);
+		else if ( errno == EACCES )
+			this->ct->sendAnswer(TYPE_E2);
+
+		return false;
+	}
+	this->ct->sendAnswer(TYPE_Y);
+
+	stat(file,&st);
+
+	cout << "SIZE: " << st.st_blksize << endl;
+	sprintf(tam,"%d",st.st_blksize);
+
+	do
+	{
+		this->ct->sendSingleMessage(TYPE_F,tam);
+		mt = this->ct->receiveAnswer();
+	}while ( ( mt != TYPE_Y ) && ( mt != TYPE_E3 ) );
+
+	if ( mt != TYPE_Y ) return NULL;
+
+	this->ct->sendUntilZ(TYPE_D,fp);//TYPE_D
+
+
+	fclose(fp);
+
+	return true;
+
+}
 bool Servidor::cmdCD(Message * msg)
 {
     byte *dir;
@@ -84,12 +125,17 @@ int main ( )
 		{
 			//msg->printMessage();
 			if ( msg->getMessageType() == TYPE_L ) {
-                //cout << msg->getMessageType() << endl;          
+                cout << "TIPO LS" << endl;          
 				servidor->cmdLS(msg);
             }
 			else if ( msg->getMessageType() == TYPE_C ) 
 			        servidor->cmdCD(msg);
 				//cout << "Tipo N" << endl;
+			else if ( msg->getMessageType() == TYPE_G )
+			{
+				cout << "TIPO GET" << endl;
+				servidor->cmdGET(msg);
+			}
 			else 
 			{
 
