@@ -23,6 +23,8 @@ class Cliente {
 		int cmdLS(char *entrada);
         void cmdCD(char *entrada);
         void cmdLLS(char *opcoes);
+        void cmdLCD(char *opcoes);
+
 };
 
 #endif

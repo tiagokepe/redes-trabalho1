@@ -16,7 +16,7 @@
 
 #include "message.h"
 
-#define DEVICE "eth4"
+#define DEVICE "eth5"
 class RawSocket {
 	public:
 		RawSocket(void);

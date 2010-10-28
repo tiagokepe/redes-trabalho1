@@ -38,6 +38,11 @@ void Cliente::interpreter(char *entrada)
 	{
 	    cmdLLS(opcoes);
 	}
+	else if( !strcmp(cmd, "lcd") )
+	{
+	    cmdLCD(opcoes);
+	}
+
 }
 
 int Cliente::cmdLS( char *entrada)
@@ -83,5 +88,11 @@ void Cliente::cmdLLS(char *opcoes)
     string opt (opcoes);    
     cmd += opt;
     system(cmd.c_str());
+    
+}
+
+void Cliente::cmdLCD(char *opcoes)
+{
+    chdir(opcoes);
     
 }
