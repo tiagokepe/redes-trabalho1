@@ -6,6 +6,9 @@
 #include <sys/select.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/statvfs.h>
+#include <string.h>
+
 
 #define MAX_TRIES 16
 #define MAX_SEQ 7
@@ -18,6 +21,7 @@ class Control {
 		RawSocket *rs;
 		void incrementSequence();
 		int waitTimeout();
+		bool diskspace(Message *msg); /* Retorna verdadeiro se houver espaço em disco. */
 		int seqEsperada;
 	public:
 		Message * escuta();

@@ -47,8 +47,8 @@ bool Servidor::cmdGET(Message *msg)
 
 	stat(file,&st);
 
-	cout << "SIZE: " << st.st_blksize << endl;
-	sprintf(tam,"%d",st.st_blksize);
+	cout << "SIZE: " << st.st_size << endl;
+	sprintf(tam,"%d",st.st_size);
 
 	do
 	{
@@ -56,7 +56,7 @@ bool Servidor::cmdGET(Message *msg)
 		mt = this->ct->receiveAnswer();
 	}while ( ( mt != TYPE_Y ) && ( mt != TYPE_E3 ) );
 
-	if ( mt != TYPE_Y ) return NULL;
+	if ( mt != TYPE_Y ) return NULL; /* Cliente não tem espaço suficiente, não envie nada. */
 
 	this->ct->sendUntilZ(TYPE_D,fp);//TYPE_D
 

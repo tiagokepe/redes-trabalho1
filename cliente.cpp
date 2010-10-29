@@ -72,6 +72,7 @@ bool Cliente::cmdGET(char *entrada)
 {
 
 	MessageType mt;
+	Message *TamArq;
 	do
 	{
 		this->ct->sendSingleMessage(TYPE_G, entrada);
@@ -89,7 +90,16 @@ bool Cliente::cmdGET(char *entrada)
 		cerr << "Permissão negada." << endl;
 		return false;
 	}
-	this->ct->sendAnswer(TYPE_Y);
+
+	/* Recebe Tamanho do arquivo. Não é necessario responder. A receiveSingleMessage deve tratar disso. */
+        TamArq = this->ct->receiveSingleMessage(TYPE_F);
+	if ( !TamArq ) return false;
+
+	if ( TamArq->getMessageType() == TYPE_E3 )
+	{
+		cerr << "Espaço insuficiente" << endl;
+		return false;
+	}
 
 	this->ct->receiveUntilZ(TYPE_D,basename(entrada));
 

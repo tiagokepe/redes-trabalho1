@@ -43,7 +43,7 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 		}
 		else if( msg->getMessageType() == TYPE_D )
 		{
-//			msg->printMessage();
+//			msg->printMessage(); /* Cuidado ao imprimir arquivos binários. */
 			tam =  msg->getMessageLength()  - 3; /* -(   (Paridade  + Sequencia + Tipo )  ); */
 			cout << "TAM + " <<  tam << endl;
 			fwrite(msg->getMessageData(),sizeof(byte),tam,saida);
@@ -73,16 +73,16 @@ bool Control::sendUntilZ(MessageType TM, FILE *fp )
 
 	while ( !feof(fp) )
 	{
-        cout << "Entrou no While" << endl;
+//        cout << "Entrou no While" << endl;
 		readcount = fread(buffer,sizeof(char),MAX_MESSAGE_SIZE-5,fp);
 
 		if ( readcount )
 			do {
                // cout << "BUFFER - ***" << buffer << endl; /* Cuidado ao imprimir buffer binário. */
 				sendSingleMessage(TM,buffer,readcount);
-                cout << "Enviou dados" << endl;
+  //              cout << "Enviou dados" << endl;
 				resposta = this->receiveAnswer();
-                cout << "Resposta = " << resposta << endl;
+    //            cout << "Resposta = " << resposta << endl;
 			} while (resposta != TYPE_Y);
 
 		rs->cleanBuf((byte * ) buffer,MAX_MESSAGE_SIZE-5);
@@ -268,7 +268,8 @@ Message * Control::escuta()
 	return NULL;
 }
 
-/* Somente aceitamensagem do tipo mt. */
+/* Somente aceitamensagem do tipo mt.
+ * Tem a responsabilidade de responder o recebimento de mensagens. */
 Message * Control::receiveSingleMessage(MessageType mt)
 {
     int i, timeout;
@@ -288,7 +289,18 @@ Message * Control::receiveSingleMessage(MessageType mt)
 				{
 					//cout << "entrou no receivemsg2" << endl;
 					received=true;
-					sendAnswer(TYPE_Y);
+
+					/* Se tipo da mensagem é arquivo, devo conferir tamanho. */
+					if ( msg->getMessageType() == TYPE_F )
+					{
+						if( diskspace(msg) )
+							sendAnswer(TYPE_Y);/* Tem espaço. */
+						else
+							sendAnswer(TYPE_E3);/* Faltou espaço. */
+					}
+					else
+						sendAnswer(TYPE_Y);
+
 					this->seqEsperada =  ( msg->getMessageSequence()  + 1)%MAX_SEQ;
 				}
 				else if ( ( msg->messageValida() == -1 ) && (this->seqEsperada >= 0 ) ) /* Paridade erra, pede reenvio. */
@@ -332,6 +344,26 @@ int Control::waitTimeout()
     tv.tv_usec = 0;
   
 	return select(this->rs->getDescriptor()+1, &rfds, NULL, NULL, &tv);
+}
+
+/* Retorna verdadeiro se tem espaço no disco para o tamanho de arquivo contido em msg. */
+bool Control::diskspace(Message *msg)
+{
+	unsigned long tamanho_arquivo;
+	struct statvfs sysinfo;
+
+	statvfs(".",&sysinfo);
+/* Para conferir estas informações use o comando "df -B 4096" */
+//	cout << "BLK SIZE:" << sysinfo.f_bsize << endl;
+//	cout << "SYS FREE SIZE:" << sysinfo.f_bavail << endl;
+	
+	cout << "Tamanho em bytes do arquivo. " << msg->getMessageData() << endl;
+
+	tamanho_arquivo = strtoul((char *) msg->getMessageData(),NULL,0);
+
+	if ( tamanho_arquivo > ( sysinfo.f_bavail * sysinfo.f_bsize ) ) return false;
+	
+	return true;
 }
 
 
