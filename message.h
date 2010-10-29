@@ -42,7 +42,7 @@ class Message
 {
     public:
        Message(byte *msg = NULL);
-	   Message(byte *msg, MessageType mt, int seq);
+	   Message(byte *msg, MessageType mt, int seq, int tamdados);
        byte *getMessageString(void) { return this->messageString; };
        int messageValida(void);
        void printMessage(void);

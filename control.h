@@ -21,7 +21,8 @@ class Control {
 		int seqEsperada;
 	public:
 		Message * escuta();
-		int sendSingleMessage(MessageType mt, char *data); /* Dados da mensagem estão em uma string. */
+		int sendSingleMessage(MessageType mt, char *data, int tamdados); /* Dados da mensagem estão em uma string. */
+		int sendSingleMessage(MessageType mt, char *data); /* Somente para dados em formato texto. */
 		int sendSingleMessage(MessageType mt, FILE *data); /* Dados da mensagem são apontados por um file pointe. */
         void sendSingleMessage(MessageType TM);
 		Message *receiveSingleMessage(MessageType mt);

@@ -43,9 +43,9 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 		}
 		else if( msg->getMessageType() == TYPE_D )
 		{
-			msg->printMessage();
-			tam = strlen((const char * ) msg->getMessageData());
-			cout << "TAM + " <<  strlen((const char * ) msg->getMessageData()) << endl;
+//			msg->printMessage();
+			tam =  msg->getMessageLength()  - 3; /* -(   (Paridade  + Sequencia + Tipo )  ); */
+			cout << "TAM + " <<  tam << endl;
 			fwrite(msg->getMessageData(),sizeof(byte),tam,saida);
 		}
 		else if ( msg->getMessageType() == TYPE_Z )
@@ -64,6 +64,7 @@ bool Control::receiveUntilZ(MessageType TM, char *dados)
 /* Manda várias mensagens até mensagem Z, indicando final. */
 bool Control::sendUntilZ(MessageType TM, FILE *fp )
 {
+	int readcount; /* Recebe número de caracteres lidos por fread. */
 	char buffer[MAX_MESSAGE_SIZE-5];
 
 	rs->cleanBuf( (byte * ) buffer,MAX_MESSAGE_SIZE-5);
@@ -73,12 +74,12 @@ bool Control::sendUntilZ(MessageType TM, FILE *fp )
 	while ( !feof(fp) )
 	{
         cout << "Entrou no While" << endl;
-		fread(buffer,sizeof(char),MAX_MESSAGE_SIZE-6,fp);
+		readcount = fread(buffer,sizeof(char),MAX_MESSAGE_SIZE-5,fp);
 
-		if ( buffer[0] )
+		if ( readcount )
 			do {
-                cout << "BUFFER - ***" << buffer << endl;
-				sendSingleMessage(TM,buffer);
+               // cout << "BUFFER - ***" << buffer << endl; /* Cuidado ao imprimir buffer binário. */
+				sendSingleMessage(TM,buffer,readcount);
                 cout << "Enviou dados" << endl;
 				resposta = this->receiveAnswer();
                 cout << "Resposta = " << resposta << endl;
@@ -97,7 +98,7 @@ bool Control::sendUntilZ(MessageType TM, FILE *fp )
 }
 
 void Control::sendSingleMessage(MessageType TM) {
-	Message *NewM = new Message( NULL,TM, this->getSequence());
+	Message *NewM = new Message( NULL,TM, this->getSequence(), 0);
 
 	this->rs->sendMessage(NewM);
 	incrementSequence();
@@ -108,8 +109,8 @@ void Control::sendSingleMessage(MessageType TM) {
 }
 
 /* Manda única mensagem do tipo TM que vem da sequencia de char em dados. */
-int Control::sendSingleMessage(MessageType TM, char *dados) {
-	Message *NewM = new Message( (byte *) dados,TM, this->getSequence());
+int Control::sendSingleMessage(MessageType TM, char *dados, int tamdados) {
+	Message *NewM = new Message( (byte *) dados,TM, this->getSequence(), tamdados);
 
 
 	this->rs->sendMessage(NewM);
@@ -123,7 +124,12 @@ int Control::sendSingleMessage(MessageType TM, char *dados) {
 	return 0;
 }
 
+/* Use somente para dados em formato texto, não use para binários. */
+int Control::sendSingleMessage(MessageType TM, char *dados) {
+	sendSingleMessage(TM,dados,strlen(dados) + 1);
+}
 /* Manda única mensagem que venha de um arquivo apontado por FP. */
+/* Função não está pronta favor não utilizá-la. */
 int Control::sendSingleMessage(MessageType TM, FILE *fp) {
 	char buffer[MAX_MESSAGE_SIZE-5];
 	rs->cleanBuf((byte * ) buffer,MAX_MESSAGE_SIZE-5);
@@ -132,13 +138,13 @@ int Control::sendSingleMessage(MessageType TM, FILE *fp) {
 
 	buffer[MAX_MESSAGE_SIZE-6] = '\0';
 
-	Message *NewM = new Message( (byte *) buffer,TM,this->getSequence());
+//	Message *NewM = new Message( (byte *) buffer,TM,this->getSequence(), strlen(buffer));
 
+	cout << "Usou função incompleta." << endl;
+//	this->rs->sendMessage(NewM);
+//	incrementSequence();
 
-	this->rs->sendMessage(NewM);
-	incrementSequence();
-
-	if ( NewM )
+	//if ( NewM )
 		//cout << "Tamanho e paridade enviados:" << NewM->getMessageLength() << " ," << NewM->getParit() << endl;
 	return 0;
 }
@@ -242,7 +248,7 @@ bool Control::sendAnswer(MessageType tipo_resposta )
 		return false;
 	
 //	cout << "ENtrou no sendAnswer" << endl;
-	sendSingleMessage(tipo_resposta,seq);
+	sendSingleMessage(tipo_resposta,seq,0);
 
 	return true;
 }

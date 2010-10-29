@@ -7,11 +7,13 @@ Message::Message(byte *msg) {
 }
 
 /* Usado para contruir mensagens a partir de dados. */
-Message::Message(byte *msg, MessageType mt, int seq) {
+Message::Message(byte *msg, MessageType mt, int seq, int tamdados) {
     byte * data = ( msg == NULL )?( byte * )strdup(""):msg; 
-	
 
-	if ( this->setMessage(data, (size_t) ( strlen( (const char *)data) + 1 ),mt, seq) )
+	if ( !msg ) 
+		tamdados = 0;
+
+	if ( this->setMessage(data, tamdados,mt, seq) )
 	{
 		this->valida = false;
 		cerr << "Esta mensagem é inválida" << endl;
