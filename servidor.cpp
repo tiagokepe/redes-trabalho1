@@ -24,6 +24,15 @@ bool Servidor::cmdLS(Message * msg)
 
 	return true;
 }
+void Servidor::cmdPUT(Message *msg)
+{
+	Message *TamArq;
+
+
+
+}
+	
+
 bool Servidor::cmdGET(Message *msg)
 {
 	FILE *fp;
@@ -56,7 +65,7 @@ bool Servidor::cmdGET(Message *msg)
 		mt = this->ct->receiveAnswer();
 	}while ( ( mt != TYPE_Y ) && ( mt != TYPE_E3 ) );
 
-	if ( mt != TYPE_Y ) return NULL; /* Cliente não tem espaço suficiente, não envie nada. */
+	if ( mt != TYPE_E3 ) return NULL; /* Cliente não tem espaço suficiente, não envie nada. */
 
 	this->ct->sendUntilZ(TYPE_D,fp);//TYPE_D
 

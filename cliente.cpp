@@ -46,6 +46,10 @@ void Cliente::interpreter(char *entrada)
 	{
 		cmdGET(opcoes);
 	}
+	else if( !strcmp(cmd, "put") )
+	{
+		cmdPUT(opcoes);
+	}
 
 }
 
@@ -104,6 +108,49 @@ bool Cliente::cmdGET(char *entrada)
 	this->ct->receiveUntilZ(TYPE_D,basename(entrada));
 
 	return true;
+}
+bool Cliente::cmdPUT(char *entrada)
+{
+	MessageType mt;
+	FILE *fp;
+	char *file;
+	struct stat st;
+	char tam[MAX_MESSAGE_SIZE-5];
+
+
+	file = entrada;
+
+	/* Tenta abrir arquivo. */
+	if ( !(fp = fopen(file,"r") ) )
+	{
+		if(errno == ENOENT ) 
+			cerr << "Arquivo não encontrado." << endl;
+		else if(errno == EACCES )
+			cerr << "Você não tem permissão de leitura." << endl;
+
+		return false;
+	}
+
+	/* Pega tamanho do arquivo. */
+	stat(file,&st);
+	sprintf(tam,"%d",st.st_size);
+
+	/* Envia a descrição do arquivo para o servidor. */
+	do
+	{
+		this->ct->sendSingleMessage(TYPE_F,tam);
+		mt = this->ct->receiveAnswer();
+	}while ( ( mt != TYPE_Y ) && ( mt != TYPE_E3 ) );
+
+	if ( mt == TYPE_E3 )
+	{
+		cerr << "O destino não possui espaço suficiente." << endl;
+		return NULL;
+	}
+
+	this->ct->sendUntilZ(TYPE_D,fp);
+
+	fclose(fp);
 }
 
 void Cliente::cmdCD(char *entrada)
