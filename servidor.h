@@ -22,6 +22,7 @@ class Servidor {
 		bool cmdLS(Message *msg );
 		bool cmdCD(Message * msg);
 		bool cmdGET(Message * msg );
+		bool cmdPUT(Message * msg );
 
 };
 

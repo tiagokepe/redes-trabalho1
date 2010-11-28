@@ -24,11 +24,25 @@ bool Servidor::cmdLS(Message * msg)
 
 	return true;
 }
-void Servidor::cmdPUT(Message *msg)
+bool Servidor::cmdPUT(Message *msg)
 {
 	Message *TamArq;
+	char *entrada = (char *) msg->getMessageData();
+	
+	this->ct->sendAnswer(TYPE_Y);
 
+	cout << "Nome do arquivo para PUT:" << msg->getMessageData() << endl;
+    TamArq = this->ct->receiveSingleMessage(TYPE_F);
+	if ( !TamArq ) return false;
 
+	if ( TamArq->getMessageType() == TYPE_E3 )
+	{
+			cerr << "Espaço insuficiente" << endl;
+			return false;
+	}	
+	this->ct->receiveUntilZ(TYPE_D,basename(entrada));
+
+	return true;
 
 }
 	
@@ -57,7 +71,7 @@ bool Servidor::cmdGET(Message *msg)
 	stat(file,&st);
 
 	cout << "SIZE: " << st.st_size << endl;
-	sprintf(tam,"%d",st.st_size);
+	sprintf(tam,"%d",(int ) st.st_size);
 
 	do
 	{
@@ -65,7 +79,7 @@ bool Servidor::cmdGET(Message *msg)
 		mt = this->ct->receiveAnswer();
 	}while ( ( mt != TYPE_Y ) && ( mt != TYPE_E3 ) );
 
-	if ( mt != TYPE_E3 ) return NULL; /* Cliente não tem espaço suficiente, não envie nada. */
+	if ( mt == TYPE_E3 ) return NULL; /* Cliente não tem espaço suficiente, não envie nada. */
 
 	this->ct->sendUntilZ(TYPE_D,fp);//TYPE_D
 
@@ -144,6 +158,11 @@ int main ( )
 			{
 				cout << "TIPO GET" << endl;
 				servidor->cmdGET(msg);
+			}
+			else if ( msg->getMessageType() == TYPE_P )
+			{
+				cout << "TIPO PUT" << endl;
+				servidor->cmdPUT(msg);
 			}
 			else 
 			{

@@ -116,8 +116,7 @@ bool Cliente::cmdPUT(char *entrada)
 	char *file;
 	struct stat st;
 	char tam[MAX_MESSAGE_SIZE-5];
-
-
+	
 	file = entrada;
 
 	/* Tenta abrir arquivo. */
@@ -130,10 +129,20 @@ bool Cliente::cmdPUT(char *entrada)
 
 		return false;
 	}
+	
+	
+	do
+	{
+		this->ct->sendSingleMessage(TYPE_P, entrada);
+		mt = this->ct->receiveAnswer();
+	}
+	while ( ( mt != TYPE_Y ) &&  ( mt != TYPE_E2 ) );
+	
+	if( mt != TYPE_Y ) return false;
 
 	/* Pega tamanho do arquivo. */
 	stat(file,&st);
-	sprintf(tam,"%d",st.st_size);
+	sprintf(tam,"%d", (int ) st.st_size);
 
 	/* Envia a descrição do arquivo para o servidor. */
 	do

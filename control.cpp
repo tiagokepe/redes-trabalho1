@@ -269,7 +269,8 @@ Message * Control::escuta()
 }
 
 /* Somente aceitamensagem do tipo mt.
- * Tem a responsabilidade de responder o recebimento de mensagens. */
+ * Tem a responsabilidade de responder o recebimento de mensagens.
+ * Para dados verifica espaço em disco. */
 Message * Control::receiveSingleMessage(MessageType mt)
 {
     int i, timeout;
