@@ -14,6 +14,9 @@ RawSocket *Control::getMySocket(void) {
 void Control::incrementSequence() {
 	this->sequence = (this->sequence + 1)%MAX_SEQ;
 }
+void Control::decrementSequence() {
+	this->sequence = (this->sequence + ( MAX_SEQ -1 ) )%MAX_SEQ;
+}
 
 /* Pega Seqüência da mensagem. */
 int Control::getSequence() {
@@ -82,6 +85,8 @@ bool Control::sendUntilZ(MessageType TM, FILE *fp )
 				sendSingleMessage(TM,buffer,readcount);
   //              cout << "Enviou dados" << endl;
 				resposta = this->receiveAnswer();
+				if ( resposta != TYPE_Y )
+					this->decrementSequence();
     //            cout << "Resposta = " << resposta << endl;
 			} while (resposta != TYPE_Y);
 
@@ -91,6 +96,8 @@ bool Control::sendUntilZ(MessageType TM, FILE *fp )
     do {
     	sendSingleMessage(TYPE_Z);
 		resposta = this->receiveAnswer();
+		if ( resposta != TYPE_Y )
+			this->decrementSequence();
     } while (resposta != TYPE_Y);
 
     cout << "Reposta = " << resposta << endl;
@@ -272,7 +279,10 @@ Message * Control::escuta()
 		if ( !( msg = this->rs->getMessage() ) ) return NULL;
 		
 		if ( msg->messageValida() == 1 )
+		{
+			this->seqEsperada = (  msg->getMessageSequence() + 1 )% MAX_SEQ;
 		    return msg;
+		}
 //	}
 
 	return NULL;
@@ -330,6 +340,11 @@ Message * Control::receiveSingleMessage(MessageType mt)
 		{
 			sendAnswer(TYPE_N);
 		}
+	}
+
+	if ( !received ) 
+	{
+		cerr << "Não recebeu nenhuma mensagem, caindo fora" << endl;
 	}
 
 	if ( !received && (!(msg) || !( msg->messageValida() ) ) ) return NULL;

@@ -20,6 +20,7 @@ class Control {
 		int sequence;
 		RawSocket *rs;
 		void incrementSequence();
+		void decrementSequence();
 		int waitTimeout();
 		bool diskspace(Message *msg); /* Retorna verdadeiro se houver espaço em disco. */
 		int seqEsperada;
