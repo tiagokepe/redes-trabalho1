@@ -3,7 +3,7 @@
 Control::Control(void) {
 	this->rs = new RawSocket();
 	this->sequence = 0;
-	this->seqEsperada = -1;
+	this->seqEsperada = 0;
 }
 
 RawSocket *Control::getMySocket(void) {
@@ -163,7 +163,7 @@ Message * Control::receiveSingleMessage()
 		if ( timeout ) /* Recebeu a mensagem no tempo esperado */
 		{
 			msg = this->rs->getMessage();
-			if ( msg ) 
+			if ( ( msg ) && ( msg->getMessageSequence() == this->seqEsperada ) ) 
 			{
 				//cout << "entrou no receivemsg" << endl;
 				if ( msg->messageValida() == 1 ) /* Mensagem recebida. */
@@ -175,6 +175,11 @@ Message * Control::receiveSingleMessage()
 				}
 				else if ( ( msg->messageValida() == -1 ) && (this->seqEsperada >= 0 ) ) /* Paridade erra, pede reenvio. */
 					sendAnswer(TYPE_N);
+			}
+			else if ( msg ) /* Se a seqüencia da mensagem não era a esperada. */
+			{
+				--i; /* Não conta como tentativa */
+				sendAnswer(TYPE_Y); /* Diz que recebeu. */
 			}
 		}
 		else //if ( this->seqEsperada >= 0 )   /* Timeout estourou, pede reenvio. */
@@ -240,7 +245,7 @@ bool Control::sendAnswer(MessageType tipo_resposta )
 	
 	this->rs->cleanBuf( (byte * ) seq,MAX_SEQ);
 
-	sprintf(seq,"%d\0",this->seqEsperada);
+	sprintf(seq,"%d\0",this->getSequence());
 
 	if ( ( tipo_resposta != TYPE_N ) && ( tipo_resposta != TYPE_Y ) 
 	        && ( tipo_resposta != TYPE_E1 )  && ( tipo_resposta != TYPE_E2 )
@@ -248,7 +253,12 @@ bool Control::sendAnswer(MessageType tipo_resposta )
 		return false;
 	
 //	cout << "ENtrou no sendAnswer" << endl;
-	sendSingleMessage(tipo_resposta,seq,0);
+	//sendSingleMessage(tipo_resposta,seq,0);
+
+	Message *NewM = new Message( (byte *) seq,tipo_resposta, this->getSequence(), strlen(seq));
+
+	if ( !NewM ) return false;
+	this->rs->sendMessage(NewM);
 
 	return true;
 }
@@ -283,7 +293,10 @@ Message * Control::receiveSingleMessage(MessageType mt)
 		if ( timeout ) /* Recebeu a mensagem no tempo esperado */
 		{
 			msg = this->rs->getMessage();
-			if ( msg ) 
+			if ( msg )
+				cout << "Seq esperada:" << this->seqEsperada << ", Seq recebida: " << msg->getMessageSequence() << endl;
+
+			if (  ( msg ) && ( msg->getMessageSequence() == this->seqEsperada ) ) 
 			{
 				//cout << "entrou no receivemsg" << endl;
 				if ( msg->messageValida() == 1 && ( ( msg->getMessageType() == mt ) || ( msg->getMessageType() == TYPE_Z   ) ) ) /* Mensagem recebida. */
@@ -306,6 +319,11 @@ Message * Control::receiveSingleMessage(MessageType mt)
 				}
 				else if ( ( msg->messageValida() == -1 ) && (this->seqEsperada >= 0 ) ) /* Paridade erra, pede reenvio. */
 					sendAnswer(TYPE_N);
+			}
+			else if ( msg ) /* Se a seqüencia da mensagem não era a esperada. */
+			{
+				--i; /* Não conta como tentativa */
+				sendAnswer(TYPE_Y); /* Diz que recebeu. */
 			}
 		}
 		else //if ( this->seqEsperada >= 0 )   /* Timeout estourou, pede reenvio. */
