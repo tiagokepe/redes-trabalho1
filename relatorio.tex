@@ -19,7 +19,7 @@
 
 \section{Funcionamento}
 
-O funcionamento de nossa rede funciona no esquema cliente-servidor. A máquina que estiver executando o servidor ficará escutando a rede,  esperando por mensagens do cliente. Quano o cliente for executado, uma espécie de Shell estará disponível para o usuário. Todos os comandos definidos na especificação estarão disponíveis, são eles:
+Nossa rede funciona no esquema cliente-servidor. A máquina que estiver executando o servidor ficará escutando a rede,  esperando por mensagens do cliente. Quando o cliente for executado, uma espécie de Shell estará disponível para o usuário. Todos os comandos definidos na especificação estarão disponíveis, são eles:
 \begin{itemize}
  \item ls [opções]
  \item cd
@@ -34,13 +34,13 @@ O funcionamento de nossa rede funciona no esquema cliente-servidor. A máquina q
 
 O envio de mensagens não é feito com janelas deslizantes, como definido na especificação. A nossa implementação baseia-se no ``Para e espera''. 
 
-Tratamos o caso em que uma mensagem é esperada, e por algum motivo ela for perdida, seja por retirada do cabo ou outro motivo. A máquina que quiser receber a mensagem, seja cliente ou servidor, deverá esperar 16 vezes por um determinado tempo (TIMEOUT). Para cada uma das tentativas falhas de recebimento, ela deverá enviar um Nack. No final da 16ª vez ela deve desistir de receber a mensagem.
-Quem estiver enviando, deve tentar enviar até receber uma um Ack. A tentativa de recebimento de resposta segue o mesmo modelo citado, exceto que nenhum Nack é enviado, já que você entraria em um ciclo de recebimento de respostas de respostas.
+Tratamos o caso em que uma mensagem é esperada, e por algum motivo ela não foi recebida imediatamente, seja por retirada do cabo ou outro motivo. A máquina que quiser receber a mensagem, seja cliente ou servidor, deverá esperar 16 vezes por um determinado tempo (TIMEOUT). Para cada uma das tentativas falhas de recebimento, ela deverá enviar um Nack. No final da 16ª vez ela deve desistir de receber a mensagem.
+Quem estiver enviando, deve tentar enviar até receber um Ack de sua mensagem. O recebimento de resposta segue o mesmo modelo citado anteriormente, exceto que nenhum Nack é enviado, já que você entraria em um ciclo de recebimento de respostas de respostas.
 
 
-O Timeout é feito por uma função. Ela usa a função do sistema chamada select. Esta função monitora o descritor do nosso socket por um determinado período. Ela retorna positivo se alguma mensagem foi recebida durante a constante TIMEOUT definida, mesmo que seja lixo, e falso se durante este período nada foi recebido.
+O Timeout é verificado por uma função. Ela usa a função do sistema chamada select. Esta função monitora o descritor do nosso socket por um determinado período. Ela retorna positivo se alguma mensagem foi recebida durante a constante TIMEOUT definida, mesmo que seja lixo, e falso se durante este período nada foi recebido.
 
-O campo tipo de mensagem define todos os tipos definidos na especificação. Além disso foram definidos tipos específicos para mensagens de erro, por motivo de simplicidade de implementação, são eles:
+O campo tipo de mensagem abrange todos os tipos definidos na especificação. Além disso foram definidos tipos específicos para mensagens de erro, por motivo de simplicidade de implementação, são eles:
 \begin{itemize}
  \item TYPE\_E1 : diretório inexistente;
  \item TYPE\_E2 : falta de permissão;
@@ -48,7 +48,13 @@ O campo tipo de mensagem define todos os tipos definidos na especificação. Al�
  \item TYPE\_E4 : arquivo inexistente.
 \end{itemize}
 
-A paridade feita é vertical
+Realizamos a paridade vertical de 16 bits. A abordagem de solução foi criar dois campos de 8 bits, chamados parity, ele é um vetor de char com duas posições. A string dos campos que a paridade considera é dividida em duas colunas, uma de posições pares e outra para posições ímpares. A posição 0 do vetor parity é reponsável por calcular a paridade da primeira coluna, enquanto a posição 1 do vetor cuida da segunda. Cada posição deste vetor fará um xor bit a bit de sua respectiva coluna. No final é feito um último xor entre as duas posições do vetor parity, para que a paridade de 16 bits caiba em um campo de 8 bits.\\ \\
+  String: 00 11 00 11 01 01 10 00 10 10 10 10 11 10 11 00 \\
+  \\             
+  P0\quad\quad\quad\quad\quad\quad P1 \\
+  00 11 00 11 $|$ 01 01 10 00 \\
+  10 10 10 10 $|$ 11 10 11 00 \\
+
 
 \section{Classes}
 
